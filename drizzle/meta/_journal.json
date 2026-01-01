@@ -1,0 +1,90 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1767193008556,
+      "tag": "0000_bent_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1767193709702,
+      "tag": "0001_lively_robbie_robertson",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1767194299163,
+      "tag": "0002_dusty_red_wolf",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1767204653671,
+      "tag": "0003_open_doorman",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1767209729117,
+      "tag": "0004_abnormal_mephistopheles",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1767210460921,
+      "tag": "0005_broad_santa_claus",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1767211013193,
+      "tag": "0006_lazy_epoch",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1767212858128,
+      "tag": "0007_strange_tyger_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1767212877789,
+      "tag": "0008_last_sage",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1767213264112,
+      "tag": "0009_mean_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1767216121119,
+      "tag": "0010_typical_black_panther",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1767216609547,
+      "tag": "0011_bumpy_switch",
+      "breakpoints": true
+    }
+  ]
+}

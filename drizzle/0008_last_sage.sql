@@ -1,0 +1,1 @@
+ALTER TABLE `custom_templates` MODIFY COLUMN `tags` json;

@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE sessions MODIFY COLUMN selectedProfile VARCHAR(100) NOT NULL DEFAULT 'patch_goblin';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user D8P1hPzTB2gvSDs.1e2fcfb2221e --database 32FJ7HPReivSdgawqQ3aa4 --execute ALTER TABLE sessions MODIFY COLUMN selectedProfile VARCHAR(100) NOT NULL DEFAULT 'patch_goblin';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 659
+}

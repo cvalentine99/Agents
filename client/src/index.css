@@ -1,0 +1,583 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Cyberpunk Purple/Neon Theme */
+:root {
+  /* Core Cyberpunk Colors */
+  --cyber-purple: oklch(0.45 0.25 290);
+  --cyber-purple-light: oklch(0.55 0.28 290);
+  --cyber-purple-dark: oklch(0.25 0.18 290);
+  --cyber-magenta: oklch(0.65 0.30 330);
+  --cyber-cyan: oklch(0.75 0.18 195);
+  --cyber-pink: oklch(0.70 0.25 350);
+  --cyber-yellow: oklch(0.85 0.20 85);
+  
+  /* Neon Glow Colors */
+  --neon-purple: oklch(0.60 0.35 290);
+  --neon-cyan: oklch(0.80 0.22 195);
+  --neon-pink: oklch(0.75 0.30 350);
+  
+  /* Dark Background Layers */
+  --bg-void: oklch(0.08 0.02 290);
+  --bg-deep: oklch(0.12 0.04 290);
+  --bg-surface: oklch(0.16 0.05 290);
+  --bg-elevated: oklch(0.20 0.06 290);
+  
+  /* Text Colors */
+  --text-primary: oklch(0.95 0.02 290);
+  --text-secondary: oklch(0.75 0.08 290);
+  --text-muted: oklch(0.55 0.06 290);
+  
+  /* Status Colors */
+  --status-success: oklch(0.70 0.20 145);
+  --status-warning: oklch(0.80 0.18 85);
+  --status-error: oklch(0.65 0.25 25);
+  --status-info: oklch(0.70 0.18 220);
+  
+  /* Circuit Breaker States */
+  --breaker-closed: oklch(0.70 0.20 145);
+  --breaker-half-open: oklch(0.80 0.18 85);
+  --breaker-open: oklch(0.65 0.25 25);
+  
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--bg-void);
+  --color-foreground: var(--text-primary);
+  --color-card: var(--bg-surface);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--bg-elevated);
+  --color-popover-foreground: var(--text-primary);
+  --color-primary: var(--cyber-purple);
+  --color-primary-foreground: var(--text-primary);
+  --color-secondary: var(--bg-surface);
+  --color-secondary-foreground: var(--text-primary);
+  --color-muted: var(--bg-deep);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--cyber-cyan);
+  --color-accent-foreground: var(--bg-void);
+  --color-destructive: var(--status-error);
+  --color-destructive-foreground: var(--text-primary);
+  --color-border: oklch(0.30 0.08 290);
+  --color-input: var(--bg-surface);
+  --color-ring: var(--neon-purple);
+  --color-chart-1: var(--cyber-purple);
+  --color-chart-2: var(--cyber-cyan);
+  --color-chart-3: var(--cyber-magenta);
+  --color-chart-4: var(--cyber-pink);
+  --color-chart-5: var(--cyber-yellow);
+  --color-sidebar: var(--bg-deep);
+  --color-sidebar-foreground: var(--text-primary);
+  --color-sidebar-primary: var(--cyber-purple);
+  --color-sidebar-primary-foreground: var(--text-primary);
+  --color-sidebar-accent: var(--bg-surface);
+  --color-sidebar-accent-foreground: var(--text-primary);
+  --color-sidebar-border: oklch(0.30 0.08 290);
+  --color-sidebar-ring: var(--neon-purple);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    background: 
+      radial-gradient(ellipse at 20% 0%, oklch(0.15 0.08 290 / 0.5) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, oklch(0.12 0.06 195 / 0.3) 0%, transparent 50%),
+      var(--bg-void);
+    min-height: 100vh;
+  }
+  
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+  
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bg-deep);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--cyber-purple);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--cyber-purple-light);
+  }
+}
+
+/* Cyberpunk Utility Classes */
+@layer utilities {
+  /* Neon Glow Effects */
+  .neon-glow-purple {
+    box-shadow: 
+      0 0 5px var(--neon-purple),
+      0 0 10px var(--neon-purple),
+      0 0 20px oklch(0.60 0.35 290 / 0.5);
+  }
+  
+  .neon-glow-cyan {
+    box-shadow: 
+      0 0 5px var(--neon-cyan),
+      0 0 10px var(--neon-cyan),
+      0 0 20px oklch(0.80 0.22 195 / 0.5);
+  }
+  
+  .neon-glow-pink {
+    box-shadow: 
+      0 0 5px var(--neon-pink),
+      0 0 10px var(--neon-pink),
+      0 0 20px oklch(0.75 0.30 350 / 0.5);
+  }
+  
+  .neon-text-purple {
+    text-shadow: 
+      0 0 5px var(--neon-purple),
+      0 0 10px var(--neon-purple);
+  }
+  
+  .neon-text-cyan {
+    text-shadow: 
+      0 0 5px var(--neon-cyan),
+      0 0 10px var(--neon-cyan);
+  }
+  
+  /* Cyberpunk Border */
+  .cyber-border {
+    border: 1px solid var(--cyber-purple);
+    box-shadow: 
+      inset 0 0 10px oklch(0.45 0.25 290 / 0.2),
+      0 0 10px oklch(0.45 0.25 290 / 0.3);
+  }
+  
+  /* Glass Effect */
+  .cyber-glass {
+    background: oklch(0.12 0.04 290 / 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid oklch(0.30 0.08 290 / 0.5);
+  }
+  
+  /* Scanline Effect */
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      oklch(0 0 0 / 0.03) 2px,
+      oklch(0 0 0 / 0.03) 4px
+    );
+    pointer-events: none;
+  }
+  
+  /* Grid Pattern */
+  .cyber-grid {
+    background-image: 
+      linear-gradient(oklch(0.30 0.08 290 / 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.30 0.08 290 / 0.3) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  /* Circuit Breaker Status Colors */
+  .breaker-closed {
+    color: var(--breaker-closed);
+    text-shadow: 0 0 10px var(--breaker-closed);
+  }
+  
+  .breaker-half-open {
+    color: var(--breaker-half-open);
+    text-shadow: 0 0 10px var(--breaker-half-open);
+  }
+  
+  .breaker-open {
+    color: var(--breaker-open);
+    text-shadow: 0 0 10px var(--breaker-open);
+  }
+  
+  /* Font utilities */
+  .font-cyber {
+    font-family: "Orbitron", system-ui, sans-serif;
+    letter-spacing: 0.1em;
+  }
+  
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1400px;
+    }
+  }
+  
+  /* Cyberpunk Card */
+  .cyber-card {
+    @apply relative overflow-hidden;
+    background: var(--bg-surface);
+    border: 1px solid oklch(0.30 0.08 290);
+  }
+  
+  .cyber-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      oklch(0.45 0.25 290 / 0.1) 0%,
+      transparent 50%
+    );
+    pointer-events: none;
+  }
+  
+  /* Cyberpunk Button */
+  .cyber-btn {
+    @apply relative px-6 py-3 font-bold uppercase tracking-wider text-sm;
+    font-family: "Orbitron", system-ui, sans-serif;
+    background: linear-gradient(135deg, var(--cyber-purple) 0%, var(--cyber-purple-dark) 100%);
+    border: 1px solid var(--cyber-purple-light);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+  
+  .cyber-btn:hover {
+    box-shadow: 
+      0 0 5px var(--neon-purple),
+      0 0 10px var(--neon-purple),
+      0 0 20px oklch(0.60 0.35 290 / 0.5);
+    background: linear-gradient(135deg, var(--cyber-purple-light) 0%, var(--cyber-purple) 100%);
+  }
+}
+
+/* ============================================
+   ULTRAWIDE DISPLAY OPTIMIZATIONS
+   Optimized for 5120x1440 and similar displays
+   ============================================ */
+
+/* Custom breakpoints for ultrawide displays */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1800px;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+  
+  /* Larger text for better readability on big screens */
+  html {
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .container {
+    max-width: 2400px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+  
+  html {
+    font-size: 18px;
+  }
+}
+
+/* Super ultrawide (5120x1440) */
+@media (min-width: 3840px) {
+  .container {
+    max-width: 4800px;
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+  
+  html {
+    font-size: 19px;
+  }
+}
+
+@media (min-width: 5000px) {
+  .container {
+    max-width: 4800px;
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+  
+  html {
+    font-size: 20px;
+  }
+}
+
+/* Ultrawide grid utilities */
+@layer utilities {
+  /* 6-column grid for ultrawide */
+  @media (min-width: 2560px) {
+    .ultrawide\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .ultrawide\:grid-cols-5 {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    .ultrawide\:grid-cols-6 {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+  
+  /* Super ultrawide grid */
+  @media (min-width: 3840px) {
+    .superwide\:grid-cols-6 {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .superwide\:grid-cols-8 {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+  }
+  
+  /* Ultrawide spacing */
+  @media (min-width: 2560px) {
+    .ultrawide\:gap-6 {
+      gap: 1.5rem;
+    }
+    .ultrawide\:gap-8 {
+      gap: 2rem;
+    }
+    .ultrawide\:p-8 {
+      padding: 2rem;
+    }
+  }
+  
+  /* Ultrawide text sizing */
+  @media (min-width: 2560px) {
+    .ultrawide\:text-lg {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+    }
+    .ultrawide\:text-xl {
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+    }
+    .ultrawide\:text-2xl {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+  }
+  
+  /* Multi-pane layout helpers */
+  .pane-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  .pane-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  .pane-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (min-width: 1536px) {
+    .pane-grid-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  
+  .pane-grid-6 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (min-width: 1280px) {
+    .pane-grid-6 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  
+  @media (min-width: 2560px) {
+    .pane-grid-6 {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+  
+  /* Sidebar width for ultrawide */
+  @media (min-width: 2560px) {
+    .ultrawide\:w-72 {
+      width: 18rem;
+    }
+    .ultrawide\:w-80 {
+      width: 20rem;
+    }
+  }
+  
+  /* Terminal/Console height for ultrawide */
+  @media (min-width: 2560px) {
+    .ultrawide\:h-96 {
+      height: 24rem;
+    }
+    .ultrawide\:max-h-\[600px\] {
+      max-height: 600px;
+    }
+  }
+}
+
+/* Dashboard specific ultrawide optimizations */
+@media (min-width: 2560px) {
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+  }
+  
+  .dashboard-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 3840px) {
+  .dashboard-grid {
+    grid-template-columns: 320px 1fr;
+    gap: 3rem;
+  }
+  
+  .dashboard-content {
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Multi-session view optimizations */
+.multi-session-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .multi-session-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .multi-session-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1920px) {
+  .multi-session-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .multi-session-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 3840px) {
+  .multi-session-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Aspect ratio helpers for session panes */
+.session-pane {
+  min-height: 350px;
+}
+
+@media (min-width: 2560px) {
+  .session-pane {
+    min-height: 400px;
+  }
+}
+
+@media (min-width: 3840px) {
+  .session-pane {
+    min-height: 450px;
+  }
+}
+
+/* Scrollbar styling for ultrawide */
+@media (min-width: 2560px) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Animation performance optimization for large displays */
+@media (min-width: 2560px) {
+  * {
+    will-change: auto;
+  }
+  
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce {
+    will-change: transform, opacity;
+  }
+}

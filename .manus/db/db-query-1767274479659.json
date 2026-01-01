@@ -1,0 +1,9 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS `rag_messages` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `conversationId` int NOT NULL,\n  `role` enum('user','assistant','system') NOT NULL,\n  `content` text NOT NULL,\n  `retrievedChunks` json,\n  `promptTokens` int NOT NULL DEFAULT 0,\n  `completionTokens` int NOT NULL DEFAULT 0,\n  `feedback` enum('positive','negative'),\n  `feedbackComment` text,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `rag_messages_id` PRIMARY KEY(`id`),\n  INDEX `rag_messages_conversation_id_idx` (`conversationId`),\n  INDEX `rag_messages_role_idx` (`role`)\n);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user D8P1hPzTB2gvSDs.1e2fcfb2221e --database 32FJ7HPReivSdgawqQ3aa4 --execute \nCREATE TABLE IF NOT EXISTS `rag_messages` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `conversationId` int NOT NULL,\n  `role` enum('user','assistant','system') NOT NULL,\n  `content` text NOT NULL,\n  `retrievedChunks` json,\n  `promptTokens` int NOT NULL DEFAULT 0,\n  `completionTokens` int NOT NULL DEFAULT 0,\n  `feedback` enum('positive','negative'),\n  `feedbackComment` text,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `rag_messages_id` PRIMARY KEY(`id`),\n  INDEX `rag_messages_conversation_id_idx` (`conversationId`),\n  INDEX `rag_messages_role_idx` (`role`)\n);\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 185
+}

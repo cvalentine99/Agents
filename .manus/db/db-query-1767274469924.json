@@ -1,0 +1,9 @@
+{
+  "query": "\nCREATE TABLE IF NOT EXISTS `rag_chunks` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `documentId` int NOT NULL,\n  `content` text NOT NULL,\n  `chunkIndex` int NOT NULL,\n  `embedding` text NOT NULL,\n  `previousChunkSummary` text,\n  `nextChunkSummary` text,\n  `tokenCount` int NOT NULL DEFAULT 0,\n  `startChar` int NOT NULL,\n  `endChar` int NOT NULL,\n  `sectionTitle` varchar(255),\n  `sectionLevel` int,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `rag_chunks_id` PRIMARY KEY(`id`),\n  INDEX `rag_chunks_document_id_idx` (`documentId`),\n  INDEX `rag_chunks_chunk_index_idx` (`documentId`, `chunkIndex`)\n);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user D8P1hPzTB2gvSDs.1e2fcfb2221e --database 32FJ7HPReivSdgawqQ3aa4 --execute \nCREATE TABLE IF NOT EXISTS `rag_chunks` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `documentId` int NOT NULL,\n  `content` text NOT NULL,\n  `chunkIndex` int NOT NULL,\n  `embedding` text NOT NULL,\n  `previousChunkSummary` text,\n  `nextChunkSummary` text,\n  `tokenCount` int NOT NULL DEFAULT 0,\n  `startChar` int NOT NULL,\n  `endChar` int NOT NULL,\n  `sectionTitle` varchar(255),\n  `sectionLevel` int,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `rag_chunks_id` PRIMARY KEY(`id`),\n  INDEX `rag_chunks_document_id_idx` (`documentId`),\n  INDEX `rag_chunks_chunk_index_idx` (`documentId`, `chunkIndex`)\n);\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 180
+}

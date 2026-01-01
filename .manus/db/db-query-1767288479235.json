@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS project_prompts (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  user_id INT NOT NULL,\n  project_path VARCHAR(500) NOT NULL,\n  content TEXT NOT NULL,\n  version INT NOT NULL DEFAULT 1,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  UNIQUE KEY unique_project_version (user_id, project_path, version),\n  INDEX idx_user_project (user_id, project_path)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user D8P1hPzTB2gvSDs.1e2fcfb2221e --database 32FJ7HPReivSdgawqQ3aa4 --execute CREATE TABLE IF NOT EXISTS project_prompts (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  user_id INT NOT NULL,\n  project_path VARCHAR(500) NOT NULL,\n  content TEXT NOT NULL,\n  version INT NOT NULL DEFAULT 1,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  UNIQUE KEY unique_project_version (user_id, project_path, version),\n  INDEX idx_user_project (user_id, project_path)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 295
+}
