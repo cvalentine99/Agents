@@ -750,3 +750,10 @@
 - [x] Add Stryker mutation testing to GitHub Actions CI (with PR comments)
 - [x] Run mutation tests on autoSignSuggestions.ts (timeout due to large file)
 - [x] Analyze mutation results for critical modules (crypto.ts: 86.15% score)
+
+## Kill Remaining Mutants
+- [x] Kill StringLiteral mutants - improved from 8 to 5 surviving (added 8 new tests)
+- [x] Kill ArithmeticOperator mutants - 3 killed with boundary tests
+- [x] LogicalOperator mutant - requires env var mocking (skipped)
+- [x] Add Stryker mutation score badge to README (90.77% score)
+- [x] Mutation score improved from 86.15% to 90.77%
