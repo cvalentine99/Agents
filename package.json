@@ -16,7 +16,8 @@
     "test:mutation:incremental": "stryker run --incremental",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "prepare": "husky"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
@@ -119,6 +120,8 @@
     "esbuild": "^0.25.12",
     "eslint": "^9.39.2",
     "globals": "^17.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "pnpm": "^10.15.1",
     "postcss": "^8.4.47",
     "prettier": "^3.6.2",
@@ -146,6 +149,15 @@
     "onlyBuiltDependencies": [
       "node-pty",
       "puppeteer"
+    ]
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
     ]
   }
 }

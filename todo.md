@@ -775,3 +775,10 @@
   - Fixed: mdast-util-to-hast, node-tar, vite, esbuild (moderate)
 - [x] Add ESLint configuration with no-console rule (eslint.config.js)
 - [x] Verify all tests pass after security updates (516 tests passing)
+
+## Pre-commit Hooks
+- [x] Install Husky and lint-staged (husky 9.1.7, lint-staged 16.2.7)
+- [x] Configure pre-commit hook to run lint-staged (eslint --fix, prettier --write)
+- [x] Configure pre-commit hook to run tests (pnpm test)
+- [x] Test pre-commit hook functionality (verified working)
+- [x] Fixed duplicate imports in db.ts (consolidated at top)
