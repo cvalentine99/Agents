@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/core/schema/stryker-schema.json",
+  "packageManager": "pnpm",
+  "plugins": [
+    "@stryker-mutator/vitest-runner"
+  ],
+  "testRunner": "vitest",
+  "mutate": [
+    "server/**/*.ts",
+    "!server/**/*.test.ts",
+    "!server/**/*.spec.ts",
+    "!server/_core/**",
+    "!server/vite.ts"
+  ],
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".stryker-tmp",
+    "client"
+  ],
+  "reporters": [
+    "html",
+    "clear-text",
+    "progress",
+    "json"
+  ],
+  "htmlReporter": {
+    "fileName": "reports/mutation/mutation-report.html"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation/mutation-report.json"
+  },
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 40
+  },
+  "concurrency": 2,
+  "timeoutMS": 60000,
+  "timeoutFactor": 2.5,
+  "cleanTempDir": "always",
+  "logLevel": "info",
+  "incremental": true,
+  "incrementalFile": ".stryker-incremental.json"
+}

@@ -737,3 +737,10 @@
 - [x] Create codecov.yml configuration file
 - [x] Generate and verify coverage report locally (26.99% statements, 68% branches)
 - [x] Add coverage badges to README
+
+## Stryker Mutation Testing
+- [x] Install Stryker dependencies (@stryker-mutator/core, vitest-runner)
+- [x] Create stryker.config.json configuration file
+- [x] Add mutation testing scripts to package.json (test:mutation, test:mutation:incremental)
+- [x] Run initial mutation test and verify setup (crypto.ts: 86.15% mutation score)
+- [x] Document mutation testing workflow

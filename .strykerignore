@@ -1,0 +1,4 @@
+# Stryker ignore patterns
+.stryker-tmp/
+.stryker-incremental.json
+reports/mutation/
