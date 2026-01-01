@@ -3,11 +3,11 @@
  * Connects to PTY WebSocket for actual command execution
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { Terminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import { WebLinksAddon } from '@xterm/addon-web-links';
-import '@xterm/xterm/css/xterm.css';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import "@xterm/xterm/css/xterm.css";
 
 interface RealTerminalProps {
   sessionId: string;
@@ -21,10 +21,10 @@ interface RealTerminalProps {
 export function RealTerminal({
   sessionId,
   userId,
-  workingDirectory = '/home/ubuntu',
+  workingDirectory = "/home/ubuntu",
   onOutput,
   onExit,
-  className = '',
+  className = "",
 }: RealTerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const terminalInstance = useRef<Terminal | null>(null);
@@ -42,27 +42,27 @@ export function RealTerminal({
       fontSize: 14,
       fontFamily: '"JetBrains Mono", "Fira Code", monospace',
       theme: {
-        background: '#0a0a1a',
-        foreground: '#e0e0e0',
-        cursor: '#00ffff',
-        cursorAccent: '#0a0a1a',
-        selectionBackground: 'rgba(0, 255, 255, 0.3)',
-        black: '#1a1a2e',
-        red: '#ff6b6b',
-        green: '#4ade80',
-        yellow: '#fbbf24',
-        blue: '#60a5fa',
-        magenta: '#c084fc',
-        cyan: '#22d3ee',
-        white: '#e0e0e0',
-        brightBlack: '#4a4a6a',
-        brightRed: '#ff8a8a',
-        brightGreen: '#6ee7b7',
-        brightYellow: '#fcd34d',
-        brightBlue: '#93c5fd',
-        brightMagenta: '#d8b4fe',
-        brightCyan: '#67e8f9',
-        brightWhite: '#ffffff',
+        background: "#0a0a1a",
+        foreground: "#e0e0e0",
+        cursor: "#00ffff",
+        cursorAccent: "#0a0a1a",
+        selectionBackground: "rgba(0, 255, 255, 0.3)",
+        black: "#1a1a2e",
+        red: "#ff6b6b",
+        green: "#4ade80",
+        yellow: "#fbbf24",
+        blue: "#60a5fa",
+        magenta: "#c084fc",
+        cyan: "#22d3ee",
+        white: "#e0e0e0",
+        brightBlack: "#4a4a6a",
+        brightRed: "#ff8a8a",
+        brightGreen: "#6ee7b7",
+        brightYellow: "#fcd34d",
+        brightBlue: "#93c5fd",
+        brightMagenta: "#d8b4fe",
+        brightCyan: "#67e8f9",
+        brightWhite: "#ffffff",
       },
       allowProposedApi: true,
     });
@@ -82,18 +82,20 @@ export function RealTerminal({
     const handleResize = () => {
       fit.fit();
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({
-          type: 'resize',
-          cols: terminal.cols,
-          rows: terminal.rows,
-        }));
+        wsRef.current.send(
+          JSON.stringify({
+            type: "resize",
+            cols: terminal.cols,
+            rows: terminal.rows,
+          })
+        );
       }
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       terminal.dispose();
       terminalInstance.current = null;
     };
@@ -103,75 +105,89 @@ export function RealTerminal({
   useEffect(() => {
     if (!terminalInstance.current) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/api/ws/pty`;
-    
+
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
       setConnected(true);
       setError(null);
-      
-      // Create PTY session
-      ws.send(JSON.stringify({
-        type: 'create',
-        sessionId,
-        userId,
-        cwd: workingDirectory,
-      }));
 
-      terminalInstance.current?.writeln('\x1b[36m● Connected to terminal\x1b[0m');
-      terminalInstance.current?.writeln(`\x1b[90mWorking directory: ${workingDirectory}\x1b[0m`);
-      terminalInstance.current?.writeln('');
+      // Create PTY session
+      ws.send(
+        JSON.stringify({
+          type: "create",
+          sessionId,
+          userId,
+          cwd: workingDirectory,
+        })
+      );
+
+      terminalInstance.current?.writeln(
+        "\x1b[36m● Connected to terminal\x1b[0m"
+      );
+      terminalInstance.current?.writeln(
+        `\x1b[90mWorking directory: ${workingDirectory}\x1b[0m`
+      );
+      terminalInstance.current?.writeln("");
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = event => {
       const message = JSON.parse(event.data);
-      
+
       switch (message.type) {
-        case 'output':
+        case "output":
           terminalInstance.current?.write(message.data);
           onOutput?.(message.data);
           break;
-          
-        case 'exit':
-          terminalInstance.current?.writeln(`\x1b[33m● Process exited with code ${message.exitCode}\x1b[0m`);
+
+        case "exit":
+          terminalInstance.current?.writeln(
+            `\x1b[33m● Process exited with code ${message.exitCode}\x1b[0m`
+          );
           onExit?.(message.exitCode);
           break;
-          
-        case 'created':
+
+        case "created":
           // Send initial resize
           if (terminalInstance.current) {
-            ws.send(JSON.stringify({
-              type: 'resize',
-              cols: terminalInstance.current.cols,
-              rows: terminalInstance.current.rows,
-            }));
+            ws.send(
+              JSON.stringify({
+                type: "resize",
+                cols: terminalInstance.current.cols,
+                rows: terminalInstance.current.rows,
+              })
+            );
           }
           break;
-          
-        case 'error':
-          terminalInstance.current?.writeln(`\x1b[31m● Error: ${message.error}\x1b[0m`);
+
+        case "error":
+          terminalInstance.current?.writeln(
+            `\x1b[31m● Error: ${message.error}\x1b[0m`
+          );
           setError(message.error);
           break;
       }
     };
 
     ws.onerror = () => {
-      setError('WebSocket connection error');
+      setError("WebSocket connection error");
       setConnected(false);
     };
 
     ws.onclose = () => {
       setConnected(false);
-      terminalInstance.current?.writeln('\x1b[33m● Disconnected from terminal\x1b[0m');
+      terminalInstance.current?.writeln(
+        "\x1b[33m● Disconnected from terminal\x1b[0m"
+      );
     };
 
     // Handle terminal input
     const inputHandler = terminalInstance.current.onData((data: string) => {
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'input', data }));
+        ws.send(JSON.stringify({ type: "input", data }));
       }
     });
 
@@ -185,7 +201,9 @@ export function RealTerminal({
   // Execute command programmatically
   const _executeCommand = useCallback((command: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'input', data: command + '\n' }));
+      wsRef.current.send(
+        JSON.stringify({ type: "input", data: command + "\n" })
+      );
     }
   }, []);
 
@@ -197,7 +215,7 @@ export function RealTerminal({
   // Kill session
   const kill = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'kill' }));
+      wsRef.current.send(JSON.stringify({ type: "kill" }));
     }
   }, []);
 
@@ -206,9 +224,11 @@ export function RealTerminal({
       {/* Status bar */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-1 bg-[#0a0a1a]/90 border-b border-purple-500/20">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
+          <div
+            className={`w-2 h-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`}
+          />
           <span className="text-xs text-gray-400">
-            {connected ? 'Connected' : 'Disconnected'}
+            {connected ? "Connected" : "Disconnected"}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -226,14 +246,14 @@ export function RealTerminal({
           </button>
         </div>
       </div>
-      
+
       {/* Terminal container */}
-      <div 
-        ref={terminalRef} 
+      <div
+        ref={terminalRef}
         className="w-full h-full pt-8"
-        style={{ minHeight: '300px' }}
+        style={{ minHeight: "300px" }}
       />
-      
+
       {/* Error overlay */}
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80">

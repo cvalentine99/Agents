@@ -887,6 +887,7 @@
 - [ ] Fix any strict mode errors (next step)
 
 ## TypeScript Strict Mode & Type Safety
+
 - [x] Enable strict mode in tsconfig.json (already enabled)
 - [x] Fix any types in routers.ts (2 fixed: Record<string, unknown>, as any)
 - [x] Fix any types in storage.ts (1 fixed: Uint8Array cast)

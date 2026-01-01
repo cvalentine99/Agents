@@ -1,6 +1,6 @@
 /**
  * PROMPT.md Editor Component
- * 
+ *
  * The core of the Ralph Loop technique - allows users to edit their PROMPT.md
  * and add "signs" when failures occur.
  */
@@ -10,22 +10,35 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { 
-  FileText, 
-  Save, 
-  History, 
-  Plus, 
-  AlertTriangle, 
+import {
+  FileText,
+  Save,
+  History,
+  Plus,
+  AlertTriangle,
   Lightbulb,
   RefreshCw,
   ChevronRight,
   Clock,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 
 interface PromptMdEditorProps {
@@ -34,8 +47,11 @@ interface PromptMdEditorProps {
   lastError?: string;
 }
 
-export function PromptMdEditor({ projectPath, onPromptChange, lastError }: PromptMdEditorProps) {
-  
+export function PromptMdEditor({
+  projectPath,
+  onPromptChange,
+  lastError,
+}: PromptMdEditorProps) {
   const [content, setContent] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -44,10 +60,11 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
   const [detectedPattern, setDetectedPattern] = useState<string | null>(null);
 
   // Fetch current PROMPT.md
-  const { data: prompt, isLoading, refetch } = trpc.promptMd.get.useQuery(
-    { projectPath },
-    { enabled: !!projectPath }
-  );
+  const {
+    data: prompt,
+    isLoading,
+    refetch,
+  } = trpc.promptMd.get.useQuery({ projectPath }, { enabled: !!projectPath });
 
   // Fetch history
   const { data: history } = trpc.promptMd.getHistory.useQuery(
@@ -56,13 +73,15 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
   );
 
   // Get default template
-  const { data: _defaultTemplate } = trpc.promptMd.getDefaultTemplate.useQuery();
+  const { data: _defaultTemplate } =
+    trpc.promptMd.getDefaultTemplate.useQuery();
 
   // Detect failure pattern when lastError changes
-  const { data: suggestedPattern } = trpc.promptMd.detectFailurePattern.useQuery(
-    { errorOutput: lastError || "" },
-    { enabled: !!lastError }
-  );
+  const { data: suggestedPattern } =
+    trpc.promptMd.detectFailurePattern.useQuery(
+      { errorOutput: lastError || "" },
+      { enabled: !!lastError }
+    );
 
   // Get suggested signs for detected pattern
   const { data: suggestedSigns } = trpc.promptMd.getSuggestedSigns.useQuery(
@@ -78,13 +97,13 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
       refetch();
       onPromptChange?.(content);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message);
     },
   });
 
   const initializeMutation = trpc.promptMd.initialize.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       setContent(data.content);
       toast.success("PROMPT.md created with default template");
       refetch();
@@ -92,7 +111,7 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
   });
 
   const addSignMutation = trpc.promptMd.addSign.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       setContent(data.content);
       setShowSignDialog(false);
       setNewSign("");
@@ -174,10 +193,11 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
         </CardHeader>
         <CardContent>
           <p className="text-sm text-slate-400 mb-4">
-            The PROMPT.md file is the core of the Ralph Loop technique. It contains your goals, 
-            context, and "signs" (guidance rules) that tune the AI's behavior over time.
+            The PROMPT.md file is the core of the Ralph Loop technique. It
+            contains your goals, context, and "signs" (guidance rules) that tune
+            the AI's behavior over time.
           </p>
-          <Button 
+          <Button
             onClick={handleInitialize}
             className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
           >
@@ -238,7 +258,8 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
             </div>
           </div>
           <CardDescription>
-            Edit your RALPH Loop configuration. Add "signs" when failures occur to tune behavior.
+            Edit your RALPH Loop configuration. Add "signs" when failures occur
+            to tune behavior.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -248,8 +269,12 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-red-400">Last Error Detected</p>
-                  <p className="text-xs text-red-300/70 mt-1 font-mono line-clamp-3">{lastError}</p>
+                  <p className="text-sm font-medium text-red-400">
+                    Last Error Detected
+                  </p>
+                  <p className="text-xs text-red-300/70 mt-1 font-mono line-clamp-3">
+                    {lastError}
+                  </p>
                   {detectedPattern && detectedPattern !== "unknown" && (
                     <Badge className="mt-2 bg-red-500/20 text-red-300 border-red-500/30">
                       Pattern: {detectedPattern.replace(/_/g, " ")}
@@ -263,7 +288,7 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
           {/* Editor */}
           <Textarea
             value={content}
-            onChange={(e) => handleContentChange(e.target.value)}
+            onChange={e => handleContentChange(e.target.value)}
             className="min-h-[400px] font-mono text-sm bg-slate-950 border-slate-700 focus:border-cyan-500"
             placeholder="# PROMPT.md - Ralph Loop Configuration..."
           />
@@ -273,10 +298,13 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
             <div className="flex items-start gap-2">
               <Lightbulb className="h-4 w-4 text-amber-400 mt-0.5" />
               <div className="text-xs text-slate-400">
-                <p className="font-medium text-amber-400 mb-1">Ralph Loop Tip</p>
+                <p className="font-medium text-amber-400 mb-1">
+                  Ralph Loop Tip
+                </p>
                 <p>
-                  "Each time Ralph does something bad, Ralph gets tuned - like a guitar." 
-                  Add specific "signs" in the Signs section when you notice repeated failures.
+                  "Each time Ralph does something bad, Ralph gets tuned - like a
+                  guitar." Add specific "signs" in the Signs section when you
+                  notice repeated failures.
                 </p>
               </div>
             </div>
@@ -298,7 +326,7 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
           </DialogHeader>
           <ScrollArea className="max-h-[400px]">
             <div className="space-y-2">
-              {history?.map((version) => (
+              {history?.map(version => (
                 <div
                   key={version.id}
                   className="p-3 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-colors"
@@ -330,14 +358,17 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
               Add a Sign to PROMPT.md
             </DialogTitle>
             <DialogDescription>
-              Signs are guidance rules that tune the AI's behavior. Add them when you notice repeated failures.
+              Signs are guidance rules that tune the AI's behavior. Add them
+              when you notice repeated failures.
             </DialogDescription>
           </DialogHeader>
 
           {/* Suggested Signs */}
           {suggestedSigns && suggestedSigns.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-slate-300">Suggested Signs:</p>
+              <p className="text-sm font-medium text-slate-300">
+                Suggested Signs:
+              </p>
               {suggestedSigns.map((sign, index) => (
                 <div
                   key={index}
@@ -355,10 +386,12 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
 
           {/* Custom Sign Input */}
           <div className="space-y-2">
-            <p className="text-sm font-medium text-slate-300">Or write your own:</p>
+            <p className="text-sm font-medium text-slate-300">
+              Or write your own:
+            </p>
             <Input
               value={newSign}
-              onChange={(e) => setNewSign(e.target.value)}
+              onChange={e => setNewSign(e.target.value)}
               placeholder="e.g., ALWAYS check file exists before reading"
               className="bg-slate-950 border-slate-700"
             />

@@ -36,7 +36,11 @@ interface SessionTemplate {
   description: string | null;
   tags: string[];
   selectedModel: "codex" | "claude" | "gemini" | "manus";
-  selectedProfile: "patch_goblin" | "architect_owl" | "test_gremlin" | "refactor_surgeon";
+  selectedProfile:
+    | "patch_goblin"
+    | "architect_owl"
+    | "test_gremlin"
+    | "refactor_surgeon";
   ralphMode: boolean;
   maxIterations: number;
   promptGoal: string | null;

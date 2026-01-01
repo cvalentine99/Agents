@@ -54,7 +54,11 @@ interface ModelWheelProps {
   disabled?: boolean;
 }
 
-export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWheelProps) {
+export function ModelWheel({
+  selectedModel,
+  onSelectModel,
+  disabled,
+}: ModelWheelProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [hoveredModel, setHoveredModel] = useState<ModelType | null>(null);
@@ -64,21 +68,23 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
 
   const spinWheel = () => {
     if (isSpinning || disabled) return;
-    
+
     setIsSpinning(true);
-    
+
     // Random number of full rotations (3-5) plus random segment
     const fullRotations = 3 + Math.floor(Math.random() * 3);
     const randomSegment = Math.floor(Math.random() * models.length);
-    const targetRotation = rotation + (fullRotations * 360) + (randomSegment * segmentAngle);
-    
+    const targetRotation =
+      rotation + fullRotations * 360 + randomSegment * segmentAngle;
+
     setRotation(targetRotation);
-    
+
     // Calculate which model will be selected
     const normalizedRotation = targetRotation % 360;
-    const selectedIndex = Math.floor(normalizedRotation / segmentAngle) % models.length;
+    const selectedIndex =
+      Math.floor(normalizedRotation / segmentAngle) % models.length;
     const invertedIndex = (models.length - selectedIndex) % models.length;
-    
+
     setTimeout(() => {
       setIsSpinning(false);
       onSelectModel(models[invertedIndex].id);
@@ -88,7 +94,7 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
   const selectModelDirectly = (model: ModelType) => {
     if (isSpinning || disabled) return;
     onSelectModel(model);
-    
+
     // Rotate to show selected model at top
     const modelIndex = models.findIndex(m => m.id === model);
     const targetRotation = modelIndex * segmentAngle;
@@ -102,7 +108,7 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
       {/* Wheel Container */}
       <div className="relative w-80 h-80">
         {/* Outer Ring Glow */}
-        <div 
+        <div
           className="absolute inset-0 rounded-full"
           style={{
             background: `conic-gradient(from 0deg, ${models.map((m, i) => `${m.color} ${i * segmentAngle}deg ${(i + 1) * segmentAngle}deg`).join(", ")})`,
@@ -110,7 +116,7 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
             opacity: 0.5,
           }}
         />
-        
+
         {/* Main Wheel */}
         <motion.div
           ref={wheelRef}
@@ -129,7 +135,7 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
             const angle = index * segmentAngle;
             const isSelected = model.id === selectedModel;
             const isHovered = model.id === hoveredModel;
-            
+
             return (
               <motion.div
                 key={model.id}
@@ -146,9 +152,10 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
                   className="absolute w-full h-full"
                   style={{
                     clipPath: `polygon(50% 50%, 50% 0%, ${50 + 50 * Math.tan(Math.PI / models.length)}% 0%, 50% 50%)`,
-                    background: isSelected || isHovered 
-                      ? `linear-gradient(to top, ${model.color}40, ${model.color}20)`
-                      : "transparent",
+                    background:
+                      isSelected || isHovered
+                        ? `linear-gradient(to top, ${model.color}40, ${model.color}20)`
+                        : "transparent",
                     borderRight: `1px solid ${model.color}40`,
                   }}
                 />
@@ -157,16 +164,20 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
                   style={{
                     transform: `translateY(-60px) rotate(${-rotation}deg)`,
                     color: isSelected ? model.color : "var(--text-secondary)",
-                    textShadow: isSelected ? `0 0 10px ${model.glowColor}` : "none",
+                    textShadow: isSelected
+                      ? `0 0 10px ${model.glowColor}`
+                      : "none",
                   }}
                 >
                   <div style={{ color: model.color }}>{model.icon}</div>
-                  <span className="font-cyber text-xs font-bold">{model.name}</span>
+                  <span className="font-cyber text-xs font-bold">
+                    {model.name}
+                  </span>
                 </div>
               </motion.div>
             );
           })}
-          
+
           {/* Center Hub */}
           <div className="absolute inset-[35%] rounded-full bg-[var(--bg-void)] cyber-border flex items-center justify-center">
             <motion.button
@@ -185,19 +196,19 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
             </motion.button>
           </div>
         </motion.div>
-        
+
         {/* Selection Indicator (Arrow at top) */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
-          <div 
+          <div
             className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[20px] border-l-transparent border-r-transparent"
-            style={{ 
+            style={{
               borderTopColor: selectedModelData?.color,
               filter: `drop-shadow(0 0 10px ${selectedModelData?.glowColor})`,
             }}
           />
         </div>
       </div>
-      
+
       {/* Selected Model Info */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -207,9 +218,9 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
           exit={{ opacity: 0, y: -10 }}
           className="text-center"
         >
-          <h3 
+          <h3
             className="font-cyber text-2xl font-bold mb-1"
-            style={{ 
+            style={{
               color: selectedModelData?.color,
               textShadow: `0 0 20px ${selectedModelData?.glowColor}`,
             }}
@@ -221,22 +232,26 @@ export function ModelWheel({ selectedModel, onSelectModel, disabled }: ModelWhee
           </p>
         </motion.div>
       </AnimatePresence>
-      
+
       {/* Quick Select Buttons */}
       <div className="flex gap-2">
-        {models.map((model) => (
+        {models.map(model => (
           <motion.button
             key={model.id}
             className={`px-3 py-1.5 text-xs font-cyber font-bold uppercase tracking-wider rounded transition-all ${
-              selectedModel === model.id 
-                ? "" 
-                : "opacity-60 hover:opacity-100"
+              selectedModel === model.id ? "" : "opacity-60 hover:opacity-100"
             }`}
             style={{
-              background: selectedModel === model.id ? `${model.color}30` : "var(--bg-surface)",
+              background:
+                selectedModel === model.id
+                  ? `${model.color}30`
+                  : "var(--bg-surface)",
               border: `1px solid ${model.color}`,
               color: model.color,
-              boxShadow: selectedModel === model.id ? `0 0 5px ${model.color}, 0 0 10px ${model.color}, 0 0 20px ${model.color}50` : "none",
+              boxShadow:
+                selectedModel === model.id
+                  ? `0 0 5px ${model.color}, 0 0 10px ${model.color}, 0 0 20px ${model.color}50`
+                  : "none",
             }}
             onClick={() => selectModelDirectly(model.id)}
             disabled={isSpinning || disabled}

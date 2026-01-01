@@ -11,7 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
   Target,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,7 @@ export function CompletionCriteriaEditor({
   criteria,
   onChange,
   disabled = false,
-  sessionId
+  sessionId,
 }: CompletionCriteriaEditorProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [newCriterion, setNewCriterion] = useState("");
@@ -54,14 +54,14 @@ export function CompletionCriteriaEditor({
   // Add a new criterion
   const addCriterion = () => {
     if (!newCriterion.trim()) return;
-    
+
     const newItem: CompletionCriterion = {
       id: `criterion-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       text: newCriterion.trim(),
       completed: false,
       createdAt: Date.now(),
     };
-    
+
     onChange([...criteria, newItem]);
     setNewCriterion("");
   };
@@ -72,14 +72,14 @@ export function CompletionCriteriaEditor({
       .split("\n")
       .map(line => line.trim())
       .filter(line => line.length > 0 && !line.startsWith("#"));
-    
+
     const newItems: CompletionCriterion[] = lines.map(text => ({
       id: `criterion-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       text: text.replace(/^[-*•]\s*/, "").replace(/^\[\s*[xX]?\s*\]\s*/, ""),
       completed: text.match(/^\[\s*[xX]\s*\]/) !== null,
       createdAt: Date.now(),
     }));
-    
+
     onChange([...criteria, ...newItems]);
     setBulkText("");
     setBulkMode(false);
@@ -88,7 +88,7 @@ export function CompletionCriteriaEditor({
   // Toggle criterion completion
   const toggleCriterion = (id: string) => {
     if (disabled) return;
-    
+
     onChange(
       criteria.map(c =>
         c.id === id
@@ -116,7 +116,7 @@ export function CompletionCriteriaEditor({
   // Save edited criterion
   const saveEdit = () => {
     if (!editingId || !editText.trim()) return;
-    
+
     onChange(
       criteria.map(c =>
         c.id === editingId ? { ...c, text: editText.trim() } : c
@@ -164,7 +164,9 @@ export function CompletionCriteriaEditor({
       >
         <div className="flex items-center gap-3">
           <Target className="w-5 h-5 text-purple-400" />
-          <span className="font-orbitron text-purple-200">COMPLETION CRITERIA</span>
+          <span className="font-orbitron text-purple-200">
+            COMPLETION CRITERIA
+          </span>
           <span className="text-xs text-purple-400/60 font-mono">
             {completedCount}/{totalCount}
           </span>
@@ -173,7 +175,9 @@ export function CompletionCriteriaEditor({
           <div className="w-24">
             <Progress value={progress} className="h-2" />
           </div>
-          <span className="text-sm text-purple-300 font-mono">{Math.round(progress)}%</span>
+          <span className="text-sm text-purple-300 font-mono">
+            {Math.round(progress)}%
+          </span>
           {isExpanded ? (
             <ChevronUp className="w-4 h-4 text-purple-400" />
           ) : (
@@ -198,7 +202,9 @@ export function CompletionCriteriaEditor({
                   <div className="text-center py-6 text-purple-400/50">
                     <Target className="w-8 h-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No completion criteria defined</p>
-                    <p className="text-xs mt-1">Add criteria to track your progress</p>
+                    <p className="text-xs mt-1">
+                      Add criteria to track your progress
+                    </p>
                   </div>
                 ) : (
                   criteria.map((criterion, index) => (
@@ -219,7 +225,9 @@ export function CompletionCriteriaEditor({
                         onClick={() => toggleCriterion(criterion.id)}
                         disabled={disabled}
                         className={`flex-shrink-0 transition-colors ${
-                          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                          disabled
+                            ? "cursor-not-allowed opacity-50"
+                            : "cursor-pointer"
                         }`}
                       >
                         {criterion.completed ? (
@@ -234,10 +242,10 @@ export function CompletionCriteriaEditor({
                         <div className="flex-1 flex items-center gap-2">
                           <Input
                             value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
+                            onChange={e => setEditText(e.target.value)}
                             className="flex-1 bg-black/40 border-purple-500/30 text-purple-100"
                             autoFocus
-                            onKeyDown={(e) => {
+                            onKeyDown={e => {
                               if (e.key === "Enter") saveEdit();
                               if (e.key === "Escape") cancelEdit();
                             }}
@@ -306,7 +314,7 @@ export function CompletionCriteriaEditor({
                     <div className="space-y-2">
                       <Textarea
                         value={bulkText}
-                        onChange={(e) => setBulkText(e.target.value)}
+                        onChange={e => setBulkText(e.target.value)}
                         placeholder="Paste multiple criteria (one per line)&#10;- [ ] First criterion&#10;- [ ] Second criterion&#10;- [x] Already completed"
                         className="bg-black/40 border-purple-500/30 text-purple-100 placeholder:text-purple-400/40 min-h-[100px] font-mono text-sm"
                       />
@@ -337,10 +345,10 @@ export function CompletionCriteriaEditor({
                     <div className="flex items-center gap-2">
                       <Input
                         value={newCriterion}
-                        onChange={(e) => setNewCriterion(e.target.value)}
+                        onChange={e => setNewCriterion(e.target.value)}
                         placeholder="Add a completion criterion..."
                         className="flex-1 bg-black/40 border-purple-500/30 text-purple-100 placeholder:text-purple-400/40"
-                        onKeyDown={(e) => {
+                        onKeyDown={e => {
                           if (e.key === "Enter") addCriterion();
                         }}
                       />
@@ -371,7 +379,9 @@ export function CompletionCriteriaEditor({
                 <div className="flex items-center justify-between pt-3 border-t border-purple-500/20">
                   <div className="text-xs text-purple-400/60">
                     {completedCount === totalCount && totalCount > 0 ? (
-                      <span className="text-green-400">✓ All criteria met!</span>
+                      <span className="text-green-400">
+                        ✓ All criteria met!
+                      </span>
                     ) : (
                       <span>{totalCount - completedCount} remaining</span>
                     )}

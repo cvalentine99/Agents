@@ -661,7 +661,11 @@ export const appRouter = router({
             input.updates.completionCriteria
           );
         }
-        await db.updateSessionTemplate(input.id, ctx.user.id, updates as Record<string, unknown>);
+        await db.updateSessionTemplate(
+          input.id,
+          ctx.user.id,
+          updates as Record<string, unknown>
+        );
         return { success: true };
       }),
 

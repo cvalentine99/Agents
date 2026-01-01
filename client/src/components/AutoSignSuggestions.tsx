@@ -1,6 +1,6 @@
 /**
  * AutoSignSuggestions Component
- * 
+ *
  * Displays auto-suggested signs based on failure patterns detected during
  * RALPH Loop execution. Users can accept (add to PROMPT.md) or dismiss suggestions.
  */
@@ -69,7 +69,7 @@ export function AutoSignSuggestions({
         signText: suggestion.sign,
         failurePattern: suggestion.pattern,
       });
-      
+
       // Dismiss after adding
       await dismissMutation.mutateAsync({
         sessionId,
@@ -174,7 +174,10 @@ export function AutoSignSuggestions({
             <Sparkles className="h-4 w-4 text-purple-400" />
             Auto-Sign Suggestions
             {suggestions && suggestions.length > 0 && (
-              <Badge variant="secondary" className="ml-2 bg-purple-500/20 text-purple-300">
+              <Badge
+                variant="secondary"
+                className="ml-2 bg-purple-500/20 text-purple-300"
+              >
                 {suggestions.length}
               </Badge>
             )}
@@ -229,10 +232,16 @@ export function AutoSignSuggestions({
                   )}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5">{getSeverityIcon(suggestion.severity)}</div>
+                    <div className="mt-0.5">
+                      {getSeverityIcon(suggestion.severity)}
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white">{suggestion.sign}</p>
-                      <p className="mt-1 text-xs text-slate-400">{suggestion.reason}</p>
+                      <p className="text-sm font-medium text-white">
+                        {suggestion.sign}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        {suggestion.reason}
+                      </p>
                       <div className="mt-2 flex items-center gap-2">
                         <Badge
                           variant="outline"
@@ -326,7 +335,7 @@ export function AutoSignSuggestions({
                 Top Failure Patterns
               </p>
               <div className="flex flex-wrap gap-1">
-                {stats.topPatterns.map((p) => (
+                {stats.topPatterns.map(p => (
                   <Badge
                     key={p.pattern}
                     variant="outline"

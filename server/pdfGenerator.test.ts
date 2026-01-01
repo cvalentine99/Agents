@@ -8,16 +8,21 @@ describe("PDF Generator", () => {
   describe("generatePDFFilename", () => {
     it("should generate a valid filename from topic", () => {
       const filename = generatePDFFilename("Latest trends in AI");
-      expect(filename).toMatch(/^research-latest-trends-in-ai-\d{4}-\d{2}-\d{2}\.pdf$/);
+      expect(filename).toMatch(
+        /^research-latest-trends-in-ai-\d{4}-\d{2}-\d{2}\.pdf$/
+      );
     });
 
     it("should sanitize special characters", () => {
       const filename = generatePDFFilename("What's the future of AI & ML?");
-      expect(filename).toMatch(/^research-what-s-the-future-of-ai-ml-\d{4}-\d{2}-\d{2}\.pdf$/);
+      expect(filename).toMatch(
+        /^research-what-s-the-future-of-ai-ml-\d{4}-\d{2}-\d{2}\.pdf$/
+      );
     });
 
     it("should truncate long topics", () => {
-      const longTopic = "This is a very long research topic that should be truncated to ensure the filename is not too long for the file system";
+      const longTopic =
+        "This is a very long research topic that should be truncated to ensure the filename is not too long for the file system";
       const filename = generatePDFFilename(longTopic);
       expect(filename.length).toBeLessThan(80);
       expect(filename).toMatch(/\.pdf$/);
@@ -75,7 +80,7 @@ describe("PDF Export Authorization", () => {
     // This tests the authorization logic conceptually
     const session = { userId: 1 };
     const requestingUserId = 2;
-    
+
     expect(session.userId).not.toBe(requestingUserId);
     // In actual implementation, this would throw "Unauthorized"
   });
@@ -83,7 +88,7 @@ describe("PDF Export Authorization", () => {
   it("should allow owner to export PDF", () => {
     const session = { userId: 1 };
     const requestingUserId = 1;
-    
+
     expect(session.userId).toBe(requestingUserId);
   });
 });

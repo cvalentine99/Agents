@@ -1,19 +1,22 @@
 import { motion } from "framer-motion";
-import { 
-  Activity, 
-  CheckCircle2, 
-  XCircle, 
-  AlertTriangle, 
-  Gauge, 
+import {
+  Activity,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Gauge,
   RotateCcw,
   Play,
   Pause,
-  Square
+  Square,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FullTerminal } from "@/components/FullTerminal";
 import { DirectoryPicker } from "@/components/DirectoryPicker";
-import { CompletionCriteriaEditor, CompletionCriterion } from "@/components/CompletionCriteriaEditor";
+import {
+  CompletionCriteriaEditor,
+  CompletionCriterion,
+} from "@/components/CompletionCriteriaEditor";
 
 export type CircuitBreakerState = "CLOSED" | "HALF_OPEN" | "OPEN";
 export type LoopStatus = "IDLE" | "RUNNING" | "PAUSED" | "COMPLETE" | "FAILED";
@@ -66,27 +69,38 @@ export function FlightComputer({
 }: FlightComputerProps) {
   const _getBreakerColor = (state: CircuitBreakerState) => {
     switch (state) {
-      case "CLOSED": return "var(--breaker-closed)";
-      case "HALF_OPEN": return "var(--breaker-half-open)";
-      case "OPEN": return "var(--breaker-open)";
+      case "CLOSED":
+        return "var(--breaker-closed)";
+      case "HALF_OPEN":
+        return "var(--breaker-half-open)";
+      case "OPEN":
+        return "var(--breaker-open)";
     }
   };
 
   const getBreakerClass = (state: CircuitBreakerState) => {
     switch (state) {
-      case "CLOSED": return "breaker-closed";
-      case "HALF_OPEN": return "breaker-half-open";
-      case "OPEN": return "breaker-open";
+      case "CLOSED":
+        return "breaker-closed";
+      case "HALF_OPEN":
+        return "breaker-half-open";
+      case "OPEN":
+        return "breaker-open";
     }
   };
 
   const getStatusColor = (status: LoopStatus) => {
     switch (status) {
-      case "IDLE": return "var(--text-muted)";
-      case "RUNNING": return "var(--cyber-cyan)";
-      case "PAUSED": return "var(--cyber-yellow)";
-      case "COMPLETE": return "var(--status-success)";
-      case "FAILED": return "var(--status-error)";
+      case "IDLE":
+        return "var(--text-muted)";
+      case "RUNNING":
+        return "var(--cyber-cyan)";
+      case "PAUSED":
+        return "var(--cyber-yellow)";
+      case "COMPLETE":
+        return "var(--status-success)";
+      case "FAILED":
+        return "var(--status-error)";
     }
   };
 
@@ -101,13 +115,13 @@ export function FlightComputer({
           <motion.div
             className="w-3 h-3 rounded-full"
             style={{ backgroundColor: getStatusColor(loopStatus) }}
-            animate={{ 
+            animate={{
               opacity: loopStatus === "RUNNING" ? [1, 0.5, 1] : 1,
               scale: loopStatus === "RUNNING" ? [1, 1.2, 1] : 1,
             }}
             transition={{ duration: 1, repeat: Infinity }}
           />
-          <span 
+          <span
             className="font-mono text-sm font-bold"
             style={{ color: getStatusColor(loopStatus) }}
           >
@@ -119,7 +133,10 @@ export function FlightComputer({
       {/* Main Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Completion Promise Meter */}
-        <div className="col-span-2 cyber-glass p-4 rounded" data-tour="completion-meter">
+        <div
+          className="col-span-2 cyber-glass p-4 rounded"
+          data-tour="completion-meter"
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-cyber uppercase tracking-wider text-[var(--text-muted)]">
               Completion Promise
@@ -157,10 +174,13 @@ export function FlightComputer({
           <div className="flex items-center gap-3">
             <motion.div
               className={`text-2xl font-cyber font-bold ${getBreakerClass(circuitBreakerState)}`}
-              animate={{ 
-                opacity: circuitBreakerState === "OPEN" ? [1, 0.5, 1] : 1 
+              animate={{
+                opacity: circuitBreakerState === "OPEN" ? [1, 0.5, 1] : 1,
               }}
-              transition={{ duration: 0.5, repeat: circuitBreakerState === "OPEN" ? Infinity : 0 }}
+              transition={{
+                duration: 0.5,
+                repeat: circuitBreakerState === "OPEN" ? Infinity : 0,
+              }}
             >
               {circuitBreakerState}
             </motion.div>
@@ -192,7 +212,7 @@ export function FlightComputer({
             </span>
           </div>
           <div className="mt-2 h-1 bg-[var(--bg-void)] rounded overflow-hidden">
-            <div 
+            <div
               className="h-full bg-[var(--cyber-purple)]"
               style={{ width: `${(currentIteration / maxIterations) * 100}%` }}
             />
@@ -218,7 +238,11 @@ export function FlightComputer({
           icon={<XCircle className="w-4 h-4" />}
           label="Errors"
           value={telemetry.errorsDetected}
-          color={telemetry.errorsDetected > 0 ? "var(--status-error)" : "var(--text-muted)"}
+          color={
+            telemetry.errorsDetected > 0
+              ? "var(--status-error)"
+              : "var(--text-muted)"
+          }
         />
         <TelemetryCard
           icon={<Gauge className="w-4 h-4" />}
@@ -230,7 +254,9 @@ export function FlightComputer({
           icon={<AlertTriangle className="w-4 h-4" />}
           label="No Progress"
           value={noProgressCount}
-          color={noProgressCount > 2 ? "var(--status-warning)" : "var(--text-muted)"}
+          color={
+            noProgressCount > 2 ? "var(--status-warning)" : "var(--text-muted)"
+          }
         />
         <TelemetryCard
           icon={<Activity className="w-4 h-4" />}
@@ -261,12 +287,12 @@ export function FlightComputer({
       </div>
 
       {/* Control Buttons */}
-      <div className="flex items-center justify-center gap-4" data-tour="start-loop">
+      <div
+        className="flex items-center justify-center gap-4"
+        data-tour="start-loop"
+      >
         {loopStatus === "IDLE" || loopStatus === "PAUSED" ? (
-          <Button
-            className="cyber-btn"
-            onClick={onStart}
-          >
+          <Button className="cyber-btn" onClick={onStart}>
             <Play className="w-4 h-4 mr-2" />
             {loopStatus === "PAUSED" ? "Resume" : "Start Loop"}
           </Button>
@@ -293,11 +319,14 @@ export function FlightComputer({
       </div>
 
       {/* Real Terminal with PTY */}
-      <div className="cyber-glass rounded overflow-hidden" style={{ minHeight: '400px' }}>
+      <div
+        className="cyber-glass rounded overflow-hidden"
+        style={{ minHeight: "400px" }}
+      >
         <FullTerminal
           sessionId={sessionId || `session-${Date.now()}`}
           userId="user"
-          workingDirectory={workingDirectory || '/home/ubuntu'}
+          workingDirectory={workingDirectory || "/home/ubuntu"}
           isExpanded={true}
         />
       </div>

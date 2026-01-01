@@ -1,9 +1,9 @@
 /**
  * Auto-Sign Suggestions Service
- * 
+ *
  * Automatically detects repeated failure patterns and suggests
  * specific signs to add to PROMPT.md to tune the AI's behavior.
- * 
+ *
  * Based on the Ralph Loop principle: "Each time Ralph does something bad,
  * Ralph gets tuned - like a guitar."
  */
@@ -14,7 +14,14 @@ import { invokeLLM } from "./_core/llm";
 export const FAILURE_PATTERNS = {
   // Test failures
   test_assertion: {
-    patterns: ["expect(", "toEqual", "toBe", "assertion failed", "expected", "received"],
+    patterns: [
+      "expect(",
+      "toEqual",
+      "toBe",
+      "assertion failed",
+      "expected",
+      "received",
+    ],
     signs: [
       "ALWAYS verify the expected behavior before writing assertions",
       "When assertions fail, check if the test expectation is correct first",
@@ -61,7 +68,11 @@ export const FAILURE_PATTERNS = {
     severity: "medium",
   },
   ts_import_error: {
-    patterns: ["cannot find module", "has no exported member", "module not found"],
+    patterns: [
+      "cannot find module",
+      "has no exported member",
+      "module not found",
+    ],
     signs: [
       "Check the import path is correct and file exists",
       "Verify the export name matches exactly (case-sensitive)",
@@ -92,7 +103,12 @@ export const FAILURE_PATTERNS = {
 
   // Runtime errors
   null_undefined: {
-    patterns: ["cannot read property", "undefined is not", "null is not", "typeerror"],
+    patterns: [
+      "cannot read property",
+      "undefined is not",
+      "null is not",
+      "typeerror",
+    ],
     signs: [
       "Add null checks before accessing object properties",
       "Use optional chaining (?.) and nullish coalescing (??)",
@@ -110,7 +126,13 @@ export const FAILURE_PATTERNS = {
     severity: "medium",
   },
   database_error: {
-    patterns: ["database", "sql", "query failed", "connection refused", "deadlock"],
+    patterns: [
+      "database",
+      "sql",
+      "query failed",
+      "connection refused",
+      "deadlock",
+    ],
     signs: [
       "Check database connection string and credentials",
       "Verify the table/column names match the schema",
@@ -241,8 +263,8 @@ export function isRepeatedError(sessionId: number): boolean {
   if (recent.length < 2) return false;
 
   // Check if the last 2-3 failures have the same pattern
-  const patterns = recent.map((f) => f.pattern);
-  return patterns.every((p) => p === patterns[0]);
+  const patterns = recent.map(f => f.pattern);
+  return patterns.every(p => p === patterns[0]);
 }
 
 /**
@@ -273,7 +295,10 @@ export function getAutoSuggestions(sessionId: number): SignSuggestion[] {
   // Count pattern occurrences
   const patternCounts = new Map<string, number>();
   for (const failure of recentFailures) {
-    patternCounts.set(failure.pattern, (patternCounts.get(failure.pattern) || 0) + 1);
+    patternCounts.set(
+      failure.pattern,
+      (patternCounts.get(failure.pattern) || 0) + 1
+    );
   }
 
   // Check for repeated errors (highest priority)
@@ -331,7 +356,11 @@ export function getAutoSuggestions(sessionId: number): SignSuggestion[] {
 /**
  * Dismiss a suggestion so it won't be shown again
  */
-export function dismissSuggestion(sessionId: number, pattern: string, sign: string): void {
+export function dismissSuggestion(
+  sessionId: number,
+  pattern: string,
+  sign: string
+): void {
   const history = sessionFailures.get(sessionId);
   if (history) {
     history.dismissedPatterns.add(`${pattern}:${sign}`);
@@ -341,7 +370,9 @@ export function dismissSuggestion(sessionId: number, pattern: string, sign: stri
 /**
  * Generate a custom sign using LLM based on the error
  */
-export async function generateCustomSign(errorOutput: string): Promise<string | null> {
+export async function generateCustomSign(
+  errorOutput: string
+): Promise<string | null> {
   try {
     const response = await invokeLLM({
       messages: [
@@ -366,7 +397,12 @@ Respond with ONLY the sign text, nothing else.`,
     });
 
     const content = response.choices[0]?.message?.content;
-    if (content && typeof content === 'string' && content.length > 10 && content.length < 200) {
+    if (
+      content &&
+      typeof content === "string" &&
+      content.length > 10 &&
+      content.length < 200
+    ) {
       return content.trim();
     }
     return null;
@@ -397,7 +433,10 @@ export function getFailureStats(sessionId: number): {
 
   const patternCounts = new Map<string, number>();
   for (const failure of history.failures) {
-    patternCounts.set(failure.pattern, (patternCounts.get(failure.pattern) || 0) + 1);
+    patternCounts.set(
+      failure.pattern,
+      (patternCounts.get(failure.pattern) || 0) + 1
+    );
   }
 
   const topPatterns: { pattern: string; count: number }[] = [];

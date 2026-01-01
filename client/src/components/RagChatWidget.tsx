@@ -51,10 +51,13 @@ export default function RagChatWidget() {
     return saved === "open";
   });
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<
+    number | null
+  >(null);
   const [messageInput, setMessageInput] = useState("");
   const [showConversationList, setShowConversationList] = useState(false);
-  const [streamingMessage, setStreamingMessage] = useState<StreamingMessage | null>(null);
+  const [streamingMessage, setStreamingMessage] =
+    useState<StreamingMessage | null>(null);
   const [showSources, setShowSources] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -75,7 +78,7 @@ export default function RagChatWidget() {
 
   // Mutations
   const createConversationMutation = trpc.rag.createConversation.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       setSelectedConversation(data.conversationId);
       conversationsQuery.refetch();
       setShowConversationList(false);
@@ -87,7 +90,7 @@ export default function RagChatWidget() {
       conversationQuery.refetch();
       setMessageInput("");
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(`Chat error: ${error.message}`);
     },
   });
@@ -110,14 +113,18 @@ export default function RagChatWidget() {
         `/api/rag/stream?userId=${user.id}&conversationId=${selectedConversation}&message=${encodeURIComponent(message)}`
       );
 
-      eventSource.addEventListener("sources", (event) => {
+      eventSource.addEventListener("sources", event => {
         const data = JSON.parse(event.data);
-        setStreamingMessage(prev => prev ? { ...prev, sources: data.chunks } : null);
+        setStreamingMessage(prev =>
+          prev ? { ...prev, sources: data.chunks } : null
+        );
       });
 
-      eventSource.addEventListener("chunk", (event) => {
+      eventSource.addEventListener("chunk", event => {
         const data = JSON.parse(event.data);
-        setStreamingMessage(prev => prev ? { ...prev, content: prev.content + data.content } : null);
+        setStreamingMessage(prev =>
+          prev ? { ...prev, content: prev.content + data.content } : null
+        );
       });
 
       eventSource.addEventListener("complete", () => {
@@ -135,7 +142,13 @@ export default function RagChatWidget() {
       setStreamingMessage(null);
       chatMutation.mutate({ conversationId: selectedConversation, message });
     }
-  }, [messageInput, selectedConversation, user, chatMutation, conversationQuery]);
+  }, [
+    messageInput,
+    selectedConversation,
+    user,
+    chatMutation,
+    conversationQuery,
+  ]);
 
   const handleSendMessage = () => {
     if (!messageInput.trim() || !selectedConversation) return;
@@ -181,7 +194,9 @@ export default function RagChatWidget() {
                 <Brain className="h-4 w-4 text-cyan-400" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white">AI Assistant</h3>
+                <h3 className="text-sm font-semibold text-white">
+                  AI Assistant
+                </h3>
                 <p className="text-[10px] text-slate-400">Knowledge Base</p>
               </div>
             </div>
@@ -192,7 +207,11 @@ export default function RagChatWidget() {
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="h-7 w-7 p-0 text-slate-400 hover:text-white"
               >
-                {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                {isExpanded ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
               </Button>
               <Button
                 variant="ghost"
@@ -218,7 +237,9 @@ export default function RagChatWidget() {
                     ? conversationQuery.data?.title || "Current Chat"
                     : "Select a conversation"}
                 </span>
-                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${showConversationList ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`h-4 w-4 text-slate-400 transition-transform ${showConversationList ? "rotate-180" : ""}`}
+                />
               </button>
 
               {/* Dropdown */}
@@ -231,7 +252,7 @@ export default function RagChatWidget() {
                     <Plus className="h-3.5 w-3.5" />
                     New Conversation
                   </button>
-                  {conversations.map((conv) => (
+                  {conversations.map(conv => (
                     <button
                       key={conv.id}
                       onClick={() => {
@@ -245,7 +266,9 @@ export default function RagChatWidget() {
                       }`}
                     >
                       <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span className="truncate">{conv.title || "Untitled"}</span>
+                      <span className="truncate">
+                        {conv.title || "Untitled"}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -287,7 +310,7 @@ export default function RagChatWidget() {
                 </div>
               ) : (
                 <>
-                  {messages.map((msg) => (
+                  {messages.map(msg => (
                     <div
                       key={msg.id}
                       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
@@ -302,28 +325,39 @@ export default function RagChatWidget() {
                         <div className="prose prose-invert prose-sm max-w-none text-xs">
                           <Streamdown>{msg.content}</Streamdown>
                         </div>
-                        
+
                         {/* Compact Sources */}
-                        {msg.role === "assistant" && msg.retrievedChunks && msg.retrievedChunks.length > 0 && (
-                          <div className="mt-2 pt-2 border-t border-slate-700">
-                            <button
-                              onClick={() => setShowSources(showSources === msg.id ? null : msg.id)}
-                              className="text-[10px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
-                            >
-                              <BookOpen className="h-2.5 w-2.5" />
-                              {msg.retrievedChunks.length} sources
-                            </button>
-                            {showSources === msg.id && (
-                              <div className="mt-1.5 space-y-1">
-                                {msg.retrievedChunks.slice(0, 3).map((chunk, i) => (
-                                  <div key={chunk.chunkId} className="text-[10px] text-slate-400">
-                                    [{i + 1}] {chunk.documentTitle}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        {msg.role === "assistant" &&
+                          msg.retrievedChunks &&
+                          msg.retrievedChunks.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-slate-700">
+                              <button
+                                onClick={() =>
+                                  setShowSources(
+                                    showSources === msg.id ? null : msg.id
+                                  )
+                                }
+                                className="text-[10px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+                              >
+                                <BookOpen className="h-2.5 w-2.5" />
+                                {msg.retrievedChunks.length} sources
+                              </button>
+                              {showSources === msg.id && (
+                                <div className="mt-1.5 space-y-1">
+                                  {msg.retrievedChunks
+                                    .slice(0, 3)
+                                    .map((chunk, i) => (
+                                      <div
+                                        key={chunk.chunkId}
+                                        className="text-[10px] text-slate-400"
+                                      >
+                                        [{i + 1}] {chunk.documentTitle}
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
                       </div>
                     </div>
                   ))}
@@ -357,20 +391,26 @@ export default function RagChatWidget() {
               <div className="flex gap-2">
                 <Input
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={e => setMessageInput(e.target.value)}
                   placeholder="Ask a question..."
                   className="flex-1 h-9 text-sm bg-slate-800/50 border-slate-700 focus:border-cyan-500"
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       handleSendMessage();
                     }
                   }}
-                  disabled={chatMutation.isPending || streamingMessage?.isStreaming}
+                  disabled={
+                    chatMutation.isPending || streamingMessage?.isStreaming
+                  }
                 />
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!messageInput.trim() || chatMutation.isPending || streamingMessage?.isStreaming}
+                  disabled={
+                    !messageInput.trim() ||
+                    chatMutation.isPending ||
+                    streamingMessage?.isStreaming
+                  }
                   size="sm"
                   className="h-9 px-3 bg-gradient-to-r from-cyan-600 to-purple-600"
                 >

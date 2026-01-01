@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Activity, 
-  FileCode, 
-  CheckCircle2, 
+import {
+  Activity,
+  FileCode,
+  CheckCircle2,
   XCircle,
   TrendingUp,
   TrendingDown,
-  Clock
+  Clock,
 } from "lucide-react";
 import {
   LineChart,
@@ -52,26 +52,31 @@ export function LiveMonitor({
   totalDuration,
   isRunning,
 }: LiveMonitorProps) {
-  const [_activeTab, _setActiveTab] = useState<"errors" | "tests" | "diffs">("diffs");
+  const [_activeTab, _setActiveTab] = useState<"errors" | "tests" | "diffs">(
+    "diffs"
+  );
 
   // Calculate trends
   const lastMetric = metrics[metrics.length - 1];
   const prevMetric = metrics[metrics.length - 2];
-  
-  const errorTrend = lastMetric && prevMetric 
-    ? lastMetric.errors - prevMetric.errors 
-    : 0;
-  const testTrend = lastMetric && prevMetric 
-    ? lastMetric.testsPassed - prevMetric.testsPassed 
-    : 0;
+
+  const errorTrend =
+    lastMetric && prevMetric ? lastMetric.errors - prevMetric.errors : 0;
+  const testTrend =
+    lastMetric && prevMetric
+      ? lastMetric.testsPassed - prevMetric.testsPassed
+      : 0;
 
   // Aggregate stats
   const totalDiffLines = metrics.reduce((acc, m) => acc + m.diffLines, 0);
   const totalTests = metrics.reduce((acc, m) => acc + m.testsRun, 0);
   const totalErrors = metrics.reduce((acc, m) => acc + m.errors, 0);
-  const avgDuration = metrics.length > 0 
-    ? Math.round(metrics.reduce((acc, m) => acc + m.duration, 0) / metrics.length)
-    : 0;
+  const avgDuration =
+    metrics.length > 0
+      ? Math.round(
+          metrics.reduce((acc, m) => acc + m.duration, 0) / metrics.length
+        )
+      : 0;
 
   return (
     <div className="cyber-card p-6 space-y-6">
@@ -83,7 +88,7 @@ export function LiveMonitor({
         <div className="flex items-center gap-2">
           <motion.div
             className={`w-2 h-2 rounded-full ${isRunning ? "bg-[var(--status-success)]" : "bg-[var(--text-muted)]"}`}
-            animate={{ 
+            animate={{
               opacity: isRunning ? [1, 0.5, 1] : 1,
               scale: isRunning ? [1, 1.2, 1] : 1,
             }}
@@ -138,23 +143,31 @@ export function LiveMonitor({
               <AreaChart data={metrics}>
                 <defs>
                   <linearGradient id="diffGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--cyber-cyan)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--cyber-cyan)" stopOpacity={0}/>
+                    <stop
+                      offset="5%"
+                      stopColor="var(--cyber-cyan)"
+                      stopOpacity={0.3}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--cyber-cyan)"
+                      stopOpacity={0}
+                    />
                   </linearGradient>
                 </defs>
-                <XAxis 
-                  dataKey="iteration" 
+                <XAxis
+                  dataKey="iteration"
                   stroke="var(--text-muted)"
                   fontSize={10}
                   tickLine={false}
                 />
-                <YAxis 
+                <YAxis
                   stroke="var(--text-muted)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
                 />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     background: "var(--bg-surface)",
                     border: "1px solid var(--color-border)",
@@ -182,19 +195,19 @@ export function LiveMonitor({
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={metrics}>
-                <XAxis 
-                  dataKey="iteration" 
+                <XAxis
+                  dataKey="iteration"
                   stroke="var(--text-muted)"
                   fontSize={10}
                   tickLine={false}
                 />
-                <YAxis 
+                <YAxis
                   stroke="var(--text-muted)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
                 />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     background: "var(--bg-surface)",
                     border: "1px solid var(--color-border)",
@@ -245,8 +258,12 @@ export function LiveMonitor({
                 <span className="font-mono text-[var(--text-primary)] flex-1 truncate">
                   {file.path}
                 </span>
-                <span className="text-[var(--status-success)]">+{file.lines.added}</span>
-                <span className="text-[var(--status-error)]">-{file.lines.removed}</span>
+                <span className="text-[var(--status-success)]">
+                  +{file.lines.added}
+                </span>
+                <span className="text-[var(--status-error)]">
+                  -{file.lines.removed}
+                </span>
               </motion.div>
             ))
           )}
@@ -259,7 +276,9 @@ export function LiveMonitor({
           label="Avg Duration"
           value={`${avgDuration}s`}
           icon={<Clock className="w-4 h-4" />}
-          status={avgDuration < 30 ? "good" : avgDuration < 60 ? "warning" : "bad"}
+          status={
+            avgDuration < 30 ? "good" : avgDuration < 60 ? "warning" : "bad"
+          }
         />
         <HealthIndicator
           label="Total Time"
@@ -269,13 +288,23 @@ export function LiveMonitor({
         />
         <HealthIndicator
           label="Error Rate"
-          value={totalTests > 0 ? `${Math.round((totalErrors / totalTests) * 100)}%` : "0%"}
+          value={
+            totalTests > 0
+              ? `${Math.round((totalErrors / totalTests) * 100)}%`
+              : "0%"
+          }
           icon={<XCircle className="w-4 h-4" />}
-          status={totalErrors === 0 ? "good" : totalErrors < 5 ? "warning" : "bad"}
+          status={
+            totalErrors === 0 ? "good" : totalErrors < 5 ? "warning" : "bad"
+          }
         />
         <HealthIndicator
           label="Progress Rate"
-          value={metrics.length > 0 ? `${Math.round(totalDiffLines / metrics.length)} lines/iter` : "0"}
+          value={
+            metrics.length > 0
+              ? `${Math.round(totalDiffLines / metrics.length)} lines/iter`
+              : "0"
+          }
           icon={<TrendingUp className="w-4 h-4" />}
           status={totalDiffLines > 0 ? "good" : "warning"}
         />
@@ -293,7 +322,14 @@ interface StatCardProps {
   color: string;
 }
 
-function StatCard({ icon, label, value, trend, invertTrend, color }: StatCardProps) {
+function StatCard({
+  icon,
+  label,
+  value,
+  trend,
+  invertTrend,
+  color,
+}: StatCardProps) {
   const showTrend = trend !== undefined && trend !== 0;
   const isPositive = invertTrend ? (trend ?? 0) < 0 : (trend ?? 0) > 0;
 
@@ -310,8 +346,14 @@ function StatCard({ icon, label, value, trend, invertTrend, color }: StatCardPro
           {value}
         </span>
         {showTrend && (
-          <span className={`text-xs flex items-center ${isPositive ? "text-[var(--status-success)]" : "text-[var(--status-error)]"}`}>
-            {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          <span
+            className={`text-xs flex items-center ${isPositive ? "text-[var(--status-success)]" : "text-[var(--status-error)]"}`}
+          >
+            {isPositive ? (
+              <TrendingUp className="w-3 h-3" />
+            ) : (
+              <TrendingDown className="w-3 h-3" />
+            )}
             {Math.abs(trend)}
           </span>
         )}
@@ -332,9 +374,9 @@ function FileChangeIcon({ type }: FileChangeIconProps) {
   };
 
   return (
-    <span 
+    <span
       className="w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center"
-      style={{ 
+      style={{
         backgroundColor: `${config[type].color}20`,
         color: config[type].color,
       }}
@@ -364,7 +406,10 @@ function HealthIndicator({ label, value, icon, status }: HealthIndicatorProps) {
       <div style={{ color: statusColors[status] }}>{icon}</div>
       <div>
         <div className="text-xs text-[var(--text-muted)]">{label}</div>
-        <div className="font-mono text-sm" style={{ color: statusColors[status] }}>
+        <div
+          className="font-mono text-sm"
+          style={{ color: statusColors[status] }}
+        >
           {value}
         </div>
       </div>

@@ -1,14 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Check, 
-  X, 
-  RotateCcw, 
+import {
+  Check,
+  X,
+  RotateCcw,
   Play,
   ChevronDown,
   ChevronRight,
   FileCode,
   Plus,
-  Minus
+  Minus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -55,11 +55,11 @@ export function DiffViewer({
 }: DiffViewerProps) {
   const totalHunks = files.reduce((acc, f) => acc + f.hunks.length, 0);
   const approvedHunks = files.reduce(
-    (acc, f) => acc + f.hunks.filter(h => h.approved === true).length, 
+    (acc, f) => acc + f.hunks.filter(h => h.approved === true).length,
     0
   );
   const deniedHunks = files.reduce(
-    (acc, f) => acc + f.hunks.filter(h => h.approved === false).length, 
+    (acc, f) => acc + f.hunks.filter(h => h.approved === false).length,
     0
   );
   const pendingHunks = totalHunks - approvedHunks - deniedHunks;
@@ -121,7 +121,7 @@ export function DiffViewer({
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  {file.hunks.map((hunk) => (
+                  {file.hunks.map(hunk => (
                     <HunkView
                       key={hunk.id}
                       hunk={hunk}
@@ -169,12 +169,12 @@ interface HunkViewProps {
 
 function HunkView({ hunk, onApprove, onDeny }: HunkViewProps) {
   return (
-    <div 
+    <div
       className={`border-t border-[var(--color-border)] ${
-        hunk.approved === true 
-          ? "bg-[var(--status-success)]/5" 
-          : hunk.approved === false 
-            ? "bg-[var(--status-error)]/5" 
+        hunk.approved === true
+          ? "bg-[var(--status-success)]/5"
+          : hunk.approved === false
+            ? "bg-[var(--status-error)]/5"
             : ""
       }`}
     >
@@ -188,8 +188,8 @@ function HunkView({ hunk, onApprove, onDeny }: HunkViewProps) {
             variant="ghost"
             size="sm"
             className={`h-7 px-2 ${
-              hunk.approved === true 
-                ? "bg-[var(--status-success)]/20 text-[var(--status-success)]" 
+              hunk.approved === true
+                ? "bg-[var(--status-success)]/20 text-[var(--status-success)]"
                 : "hover:bg-[var(--status-success)]/10 hover:text-[var(--status-success)]"
             }`}
             onClick={onApprove}
@@ -200,8 +200,8 @@ function HunkView({ hunk, onApprove, onDeny }: HunkViewProps) {
             variant="ghost"
             size="sm"
             className={`h-7 px-2 ${
-              hunk.approved === false 
-                ? "bg-[var(--status-error)]/20 text-[var(--status-error)]" 
+              hunk.approved === false
+                ? "bg-[var(--status-error)]/20 text-[var(--status-error)]"
                 : "hover:bg-[var(--status-error)]/10 hover:text-[var(--status-error)]"
             }`}
             onClick={onDeny}
@@ -236,7 +236,7 @@ function HunkView({ hunk, onApprove, onDeny }: HunkViewProps) {
 
             {/* Line Content */}
             <div className="flex-1 flex items-center">
-              <span 
+              <span
                 className={`w-6 text-center flex-shrink-0 ${
                   line.type === "addition"
                     ? "text-[var(--status-success)]"
@@ -268,7 +268,7 @@ function HunkView({ hunk, onApprove, onDeny }: HunkViewProps) {
 export function parseDiff(diffText: string): DiffFile[] {
   const files: DiffFile[] = [];
   const lines = diffText.split("\n");
-  
+
   let currentFile: DiffFile | null = null;
   let currentHunk: DiffHunk | null = null;
   let oldLine = 0;
@@ -276,10 +276,13 @@ export function parseDiff(diffText: string): DiffFile[] {
   let hunkId = 0;
 
   for (const line of lines) {
-    if (line.startsWith("diff --git") || line.startsWith("--- ") && line.includes("/")) {
+    if (
+      line.startsWith("diff --git") ||
+      (line.startsWith("--- ") && line.includes("/"))
+    ) {
       continue;
     }
-    
+
     if (line.startsWith("+++ ")) {
       if (currentFile) {
         files.push(currentFile);
@@ -296,13 +299,13 @@ export function parseDiff(diffText: string): DiffFile[] {
       if (currentHunk && currentFile) {
         currentFile.hunks.push(currentHunk);
       }
-      
+
       const match = line.match(/@@ -(\d+),?\d* \+(\d+),?\d* @@/);
       if (match) {
         oldLine = parseInt(match[1]);
         newLine = parseInt(match[2]);
       }
-      
+
       currentHunk = {
         id: `hunk-${hunkId++}`,
         header: line,

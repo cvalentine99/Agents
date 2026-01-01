@@ -89,7 +89,7 @@ export function ProfileTemplateGallery({ onImport }: ProfileTemplateGalleryProps
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
 
   const { data: templatesData, isLoading } = trpc.agentProfiles.listTemplates.useQuery({
-    category: selectedCategory as any,
+    category: selectedCategory as 'security' | 'documentation' | 'architecture' | 'performance' | 'testing' | 'devops' | 'specialized' | 'all',
     search: searchQuery || undefined,
   });
 

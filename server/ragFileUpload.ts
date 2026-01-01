@@ -4,7 +4,9 @@
  */
 
 import * as pdfParse from "pdf-parse";
-const pdf = ((pdfParse as Record<string, unknown>).default || pdfParse) as (buffer: Buffer) => Promise<{ text: string; numpages: number }>;
+const pdf = ((pdfParse as Record<string, unknown>).default || pdfParse) as (
+  buffer: Buffer
+) => Promise<{ text: string; numpages: number }>;
 
 // Supported file extensions and their MIME types
 export const SUPPORTED_FILE_TYPES = {
@@ -12,7 +14,7 @@ export const SUPPORTED_FILE_TYPES = {
   ".pdf": "application/pdf",
   ".md": "text/markdown",
   ".txt": "text/plain",
-  
+
   // Code files
   ".ts": "text/typescript",
   ".tsx": "text/typescript",
@@ -71,7 +73,9 @@ export function getMimeType(filename: string): string {
 /**
  * Parse PDF file and extract text content
  */
-async function parsePDF(buffer: Buffer): Promise<{ text: string; pageCount: number }> {
+async function parsePDF(
+  buffer: Buffer
+): Promise<{ text: string; pageCount: number }> {
   try {
     const data = await pdf(buffer);
     return {
@@ -79,7 +83,9 @@ async function parsePDF(buffer: Buffer): Promise<{ text: string; pageCount: numb
       pageCount: data.numpages,
     };
   } catch (error) {
-    throw new Error(`Failed to parse PDF: ${error instanceof Error ? error.message : "Unknown error"}`);
+    throw new Error(
+      `Failed to parse PDF: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
 }
 
@@ -112,7 +118,7 @@ function parseCodeFile(content: string, extension: string): string {
     ".sh": "Shell",
     ".bash": "Bash",
   };
-  
+
   const language = languageMap[extension] || "Code";
   return `[${language} File]\n\n${content}`;
 }
@@ -126,14 +132,14 @@ export async function parseFile(
 ): Promise<ParsedFile> {
   const extension = getFileExtension(filename);
   const mimeType = getMimeType(filename);
-  
+
   if (!isSupportedFileType(filename)) {
     throw new Error(`Unsupported file type: ${extension}`);
   }
-  
+
   let content: string;
   let pageCount: number | undefined;
-  
+
   if (extension === ".pdf") {
     const pdfResult = await parsePDF(buffer);
     content = pdfResult.text;
@@ -141,7 +147,7 @@ export async function parseFile(
   } else {
     // Text-based files
     const textContent = buffer.toString("utf-8");
-    
+
     if (extension === ".md") {
       content = parseMarkdown(textContent);
     } else if (extension in SUPPORTED_FILE_TYPES && extension !== ".txt") {
@@ -150,11 +156,11 @@ export async function parseFile(
       content = textContent;
     }
   }
-  
+
   // Calculate word and character counts
   const wordCount = content.split(/\s+/).filter(Boolean).length;
   const charCount = content.length;
-  
+
   return {
     content,
     metadata: {
@@ -188,19 +194,22 @@ export function formatFileSize(bytes: number): string {
 /**
  * Extract title from file content
  */
-export function extractTitleFromContent(content: string, filename: string): string {
+export function extractTitleFromContent(
+  content: string,
+  filename: string
+): string {
   // Try to extract title from markdown heading
   const h1Match = content.match(/^#\s+(.+)$/m);
   if (h1Match) {
     return h1Match[1].trim();
   }
-  
+
   // Try to extract from first non-empty line
   const firstLine = content.split("\n").find(line => line.trim().length > 0);
   if (firstLine && firstLine.length < 100) {
     return firstLine.trim();
   }
-  
+
   // Fall back to filename without extension
   return filename.replace(/\.[^.]+$/, "");
 }
@@ -208,10 +217,26 @@ export function extractTitleFromContent(content: string, filename: string): stri
 /**
  * Detect source type from file extension
  */
-export function detectSourceType(extension: string): "file" | "code" | "documentation" {
-  const codeExtensions = [".ts", ".tsx", ".js", ".jsx", ".py", ".json", ".yaml", ".yml", ".html", ".css", ".sql", ".sh", ".bash"];
+export function detectSourceType(
+  extension: string
+): "file" | "code" | "documentation" {
+  const codeExtensions = [
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".py",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".html",
+    ".css",
+    ".sql",
+    ".sh",
+    ".bash",
+  ];
   const docExtensions = [".md", ".txt", ".pdf"];
-  
+
   if (codeExtensions.includes(extension)) {
     return "code";
   }

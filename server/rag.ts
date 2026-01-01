@@ -1,20 +1,20 @@
 /**
  * RAG (Retrieval-Augmented Generation) Service
- * 
+ *
  * Provides document ingestion, chunking, embedding generation,
  * semantic search, and context-aware response generation.
  */
 
 import { drizzle } from "drizzle-orm/mysql2";
 import { invokeLLM } from "./_core/llm";
-import { 
-  ragDocuments, 
-  ragChunks, 
-  ragConversations, 
+import {
+  ragDocuments,
+  ragChunks,
+  ragConversations,
   ragMessages,
   ragSearchHistory,
   type RagDocument,
-  type RagConversation
+  type RagConversation,
 } from "../drizzle/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import crypto from "crypto";
@@ -94,27 +94,30 @@ export function estimateTokens(text: string): number {
  * Split text into overlapping chunks
  */
 export function chunkText(
-  text: string, 
-  chunkSize: number = CHUNK_SIZE, 
+  text: string,
+  chunkSize: number = CHUNK_SIZE,
   overlap: number = CHUNK_OVERLAP
 ): { content: string; startChar: number; endChar: number }[] {
   const chunks: { content: string; startChar: number; endChar: number }[] = [];
-  
+
   // Split by paragraphs first to maintain semantic boundaries
   const paragraphs = text.split(/\n\n+/);
   let currentChunk = "";
   let startChar = 0;
   let currentStart = 0;
-  
+
   for (const paragraph of paragraphs) {
-    if (currentChunk.length + paragraph.length > chunkSize && currentChunk.length > 0) {
+    if (
+      currentChunk.length + paragraph.length > chunkSize &&
+      currentChunk.length > 0
+    ) {
       // Save current chunk
       chunks.push({
         content: currentChunk.trim(),
         startChar: currentStart,
-        endChar: startChar - 1
+        endChar: startChar - 1,
       });
-      
+
       // Start new chunk with overlap
       const overlapText = currentChunk.slice(-overlap);
       currentChunk = overlapText + "\n\n" + paragraph;
@@ -127,28 +130,31 @@ export function chunkText(
     }
     startChar += paragraph.length + 2; // +2 for \n\n
   }
-  
+
   // Add final chunk
   if (currentChunk.trim().length > 0) {
     chunks.push({
       content: currentChunk.trim(),
       startChar: currentStart,
-      endChar: text.length
+      endChar: text.length,
     });
   }
-  
+
   return chunks;
 }
 
 /**
  * Extract section information from markdown content
  */
-export function extractSectionInfo(content: string): { title?: string; level?: number } {
+export function extractSectionInfo(content: string): {
+  title?: string;
+  level?: number;
+} {
   const headingMatch = content.match(/^(#{1,6})\s+(.+)$/m);
   if (headingMatch) {
     return {
       level: headingMatch[1].length,
-      title: headingMatch[2].trim()
+      title: headingMatch[2].trim(),
     };
   }
   return {};
@@ -165,12 +171,12 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     messages: [
       {
         role: "system",
-        content: `You are an embedding generator. Given text, output a JSON array of exactly ${EMBEDDING_DIMENSION} floating point numbers between -1 and 1 that represent the semantic meaning of the text. Focus on key concepts, entities, and relationships. Output ONLY the JSON array, nothing else.`
+        content: `You are an embedding generator. Given text, output a JSON array of exactly ${EMBEDDING_DIMENSION} floating point numbers between -1 and 1 that represent the semantic meaning of the text. Focus on key concepts, entities, and relationships. Output ONLY the JSON array, nothing else.`,
       },
       {
         role: "user",
-        content: `Generate embedding for: "${text.slice(0, 500)}"`
-      }
+        content: `Generate embedding for: "${text.slice(0, 500)}"`,
+      },
     ],
     response_format: {
       type: "json_schema",
@@ -183,40 +189,48 @@ export async function generateEmbedding(text: string): Promise<number[]> {
             vector: {
               type: "array",
               items: { type: "number" },
-              description: "Embedding vector"
-            }
+              description: "Embedding vector",
+            },
           },
           required: ["vector"],
-          additionalProperties: false
-        }
-      }
-    }
+          additionalProperties: false,
+        },
+      },
+    },
   });
-  
+
   try {
     const msgContent = response.choices[0].message.content;
-    const contentStr = typeof msgContent === 'string' ? msgContent : '{}';
+    const contentStr = typeof msgContent === "string" ? msgContent : "{}";
     const parsed = JSON.parse(contentStr);
     let vector = parsed.vector || [];
-    
+
     // Ensure correct dimension
     if (vector.length < EMBEDDING_DIMENSION) {
       // Pad with zeros
-      vector = [...vector, ...new Array(EMBEDDING_DIMENSION - vector.length).fill(0)];
+      vector = [
+        ...vector,
+        ...new Array(EMBEDDING_DIMENSION - vector.length).fill(0),
+      ];
     } else if (vector.length > EMBEDDING_DIMENSION) {
       vector = vector.slice(0, EMBEDDING_DIMENSION);
     }
-    
+
     // Normalize
-    const magnitude = Math.sqrt(vector.reduce((sum: number, v: number) => sum + v * v, 0));
+    const magnitude = Math.sqrt(
+      vector.reduce((sum: number, v: number) => sum + v * v, 0)
+    );
     if (magnitude > 0) {
       vector = vector.map((v: number) => v / magnitude);
     }
-    
+
     return vector;
   } catch {
     // Fallback: generate random normalized vector (not ideal but prevents failures)
-    const vector = Array.from({ length: EMBEDDING_DIMENSION }, () => Math.random() * 2 - 1);
+    const vector = Array.from(
+      { length: EMBEDDING_DIMENSION },
+      () => Math.random() * 2 - 1
+    );
     const magnitude = Math.sqrt(vector.reduce((sum, v) => sum + v * v, 0));
     return vector.map(v => v / magnitude);
   }
@@ -227,22 +241,22 @@ export async function generateEmbedding(text: string): Promise<number[]> {
  */
 export function cosineSimilarity(a: number[], b: number[]): number {
   if (a.length !== b.length) return 0;
-  
+
   let dotProduct = 0;
   let magnitudeA = 0;
   let magnitudeB = 0;
-  
+
   for (let i = 0; i < a.length; i++) {
     dotProduct += a[i] * b[i];
     magnitudeA += a[i] * a[i];
     magnitudeB += b[i] * b[i];
   }
-  
+
   magnitudeA = Math.sqrt(magnitudeA);
   magnitudeB = Math.sqrt(magnitudeB);
-  
+
   if (magnitudeA === 0 || magnitudeB === 0) return 0;
-  
+
   return dotProduct / (magnitudeA * magnitudeB);
 }
 
@@ -264,21 +278,25 @@ export async function ingestDocument(
 ): Promise<{ documentId: number; chunkCount: number }> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   const contentHash = hashContent(content);
-  
+
   // Check for duplicate
-  const existing = await db.select().from(ragDocuments)
-    .where(and(
-      eq(ragDocuments.userId, userId),
-      eq(ragDocuments.contentHash, contentHash)
-    ))
+  const existing = await db
+    .select()
+    .from(ragDocuments)
+    .where(
+      and(
+        eq(ragDocuments.userId, userId),
+        eq(ragDocuments.contentHash, contentHash)
+      )
+    )
     .limit(1);
-  
+
   if (existing.length > 0) {
     return { documentId: existing[0].id, chunkCount: existing[0].chunkCount };
   }
-  
+
   // Create document record
   const [doc] = await db.insert(ragDocuments).values({
     userId,
@@ -289,23 +307,23 @@ export async function ingestDocument(
     contentHash,
     status: "processing",
     tags: tags || [],
-    metadata: metadata || {}
+    metadata: metadata || {},
   });
-  
+
   const documentId = doc.insertId;
-  
+
   try {
     // Chunk the document
     const chunks = chunkText(content);
-    
+
     // Generate embeddings and store chunks
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
       const sectionInfo = extractSectionInfo(chunk.content);
-      
+
       // Generate embedding
       const embedding = await generateEmbedding(chunk.content);
-      
+
       await db.insert(ragChunks).values({
         documentId,
         content: chunk.content,
@@ -315,29 +333,31 @@ export async function ingestDocument(
         startChar: chunk.startChar,
         endChar: chunk.endChar,
         sectionTitle: sectionInfo.title,
-        sectionLevel: sectionInfo.level
+        sectionLevel: sectionInfo.level,
       });
     }
-    
+
     // Update document status
-    await db.update(ragDocuments)
-      .set({ 
-        status: "indexed", 
+    await db
+      .update(ragDocuments)
+      .set({
+        status: "indexed",
         chunkCount: chunks.length,
-        indexedAt: new Date()
+        indexedAt: new Date(),
       })
       .where(eq(ragDocuments.id, documentId));
-    
+
     return { documentId, chunkCount: chunks.length };
   } catch (error) {
     // Mark as failed
-    await db.update(ragDocuments)
-      .set({ 
-        status: "failed", 
-        errorMessage: error instanceof Error ? error.message : "Unknown error"
+    await db
+      .update(ragDocuments)
+      .set({
+        status: "failed",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
       })
       .where(eq(ragDocuments.id, documentId));
-    
+
     throw error;
   }
 }
@@ -345,26 +365,30 @@ export async function ingestDocument(
 /**
  * Delete a document and its chunks
  */
-export async function deleteDocument(documentId: number, userId: number): Promise<boolean> {
+export async function deleteDocument(
+  documentId: number,
+  userId: number
+): Promise<boolean> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   // Verify ownership
-  const docs = await db.select().from(ragDocuments)
-    .where(and(
-      eq(ragDocuments.id, documentId),
-      eq(ragDocuments.userId, userId)
-    ))
+  const docs = await db
+    .select()
+    .from(ragDocuments)
+    .where(
+      and(eq(ragDocuments.id, documentId), eq(ragDocuments.userId, userId))
+    )
     .limit(1);
-  
+
   if (docs.length === 0) return false;
-  
+
   // Delete chunks first
   await db.delete(ragChunks).where(eq(ragChunks.documentId, documentId));
-  
+
   // Delete document
   await db.delete(ragDocuments).where(eq(ragDocuments.id, documentId));
-  
+
   return true;
 }
 
@@ -374,8 +398,10 @@ export async function deleteDocument(documentId: number, userId: number): Promis
 export async function listDocuments(userId: number): Promise<RagDocument[]> {
   const db = await getDb();
   if (!db) return [];
-  
-  return db.select().from(ragDocuments)
+
+  return db
+    .select()
+    .from(ragDocuments)
     .where(eq(ragDocuments.userId, userId))
     .orderBy(desc(ragDocuments.createdAt));
 }
@@ -395,68 +421,75 @@ export async function semanticSearch(
 ): Promise<RAGSearchResult> {
   const db = await getDb();
   if (!db) return { chunks: [], query, searchDurationMs: 0 };
-  
+
   const startTime = Date.now();
-  
+
   // Generate query embedding
   const queryEmbedding = await generateEmbedding(query);
-  
+
   // Get all documents for user that are indexed
-  const userDocs = await db.select({ id: ragDocuments.id, title: ragDocuments.title })
+  const userDocs = await db
+    .select({ id: ragDocuments.id, title: ragDocuments.title })
     .from(ragDocuments)
-    .where(and(
-      eq(ragDocuments.userId, userId),
-      eq(ragDocuments.status, "indexed")
-    ));
-  
-  const docIds = userDocs.map((d) => d.id);
-  const docTitles = new Map(userDocs.map((d) => [d.id, d.title]));
-  
+    .where(
+      and(eq(ragDocuments.userId, userId), eq(ragDocuments.status, "indexed"))
+    );
+
+  const docIds = userDocs.map(d => d.id);
+  const docTitles = new Map(userDocs.map(d => [d.id, d.title]));
+
   if (docIds.length === 0) {
     return { chunks: [], query, searchDurationMs: Date.now() - startTime };
   }
-  
+
   // Get all chunks for these documents
-  const allChunks = await db.select().from(ragChunks)
-    .where(sql`${ragChunks.documentId} IN (${sql.join(docIds.map((id) => sql`${id}`), sql`, `)})`);
-  
+  const allChunks = await db
+    .select()
+    .from(ragChunks)
+    .where(
+      sql`${ragChunks.documentId} IN (${sql.join(
+        docIds.map(id => sql`${id}`),
+        sql`, `
+      )})`
+    );
+
   // Calculate similarities
-  const chunksWithSimilarity: ChunkMetadata[] = allChunks.map((chunk) => {
+  const chunksWithSimilarity: ChunkMetadata[] = allChunks.map(chunk => {
     const chunkEmbedding = JSON.parse(chunk.embedding) as number[];
     const similarity = cosineSimilarity(queryEmbedding, chunkEmbedding);
-    
+
     return {
       chunkId: chunk.id,
       documentId: chunk.documentId,
       documentTitle: docTitles.get(chunk.documentId) || "Unknown",
       content: chunk.content,
       similarity,
-      sectionTitle: chunk.sectionTitle || undefined
+      sectionTitle: chunk.sectionTitle || undefined,
     };
   });
-  
+
   // Sort by similarity and take top K
   const topChunks = chunksWithSimilarity
     .sort((a, b) => b.similarity - a.similarity)
     .slice(0, topK);
-  
+
   const searchDurationMs = Date.now() - startTime;
-  
+
   // Log search history
   await db.insert(ragSearchHistory).values({
     userId,
     query,
     queryEmbedding: JSON.stringify(queryEmbedding),
     resultCount: topChunks.length,
-    topChunkIds: topChunks.map((c) => c.chunkId),
+    topChunkIds: topChunks.map(c => c.chunkId),
     conversationId,
-    searchDurationMs
+    searchDurationMs,
   });
-  
+
   return {
     chunks: topChunks,
     query,
-    searchDurationMs
+    searchDurationMs,
   };
 }
 
@@ -474,13 +507,13 @@ export async function createConversation(
 ): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   const [result] = await db.insert(ragConversations).values({
     userId,
     title: title || "New Conversation",
-    systemPrompt
+    systemPrompt,
   });
-  
+
   return result.insertId;
 }
 
@@ -490,86 +523,118 @@ export async function createConversation(
 export async function getConversation(conversationId: number, userId: number) {
   const db = await getDb();
   if (!db) return null;
-  
-  const conversations = await db.select().from(ragConversations)
-    .where(and(
-      eq(ragConversations.id, conversationId),
-      eq(ragConversations.userId, userId)
-    ))
+
+  const conversations = await db
+    .select()
+    .from(ragConversations)
+    .where(
+      and(
+        eq(ragConversations.id, conversationId),
+        eq(ragConversations.userId, userId)
+      )
+    )
     .limit(1);
-  
+
   if (conversations.length === 0) return null;
-  
+
   const conversation = conversations[0];
-  
-  const messages = await db.select().from(ragMessages)
+
+  const messages = await db
+    .select()
+    .from(ragMessages)
     .where(eq(ragMessages.conversationId, conversationId))
     .orderBy(ragMessages.createdAt);
-  
+
   return { ...conversation, messages };
 }
 
 /**
  * List conversations for a user
  */
-export async function listConversations(userId: number, includeArchived = false): Promise<RagConversation[]> {
+export async function listConversations(
+  userId: number,
+  includeArchived = false
+): Promise<RagConversation[]> {
   const db = await getDb();
   if (!db) return [];
-  
+
   if (includeArchived) {
-    return db.select().from(ragConversations)
+    return db
+      .select()
+      .from(ragConversations)
       .where(eq(ragConversations.userId, userId))
       .orderBy(desc(ragConversations.updatedAt));
   }
-  
-  return db.select().from(ragConversations)
-    .where(and(
-      eq(ragConversations.userId, userId),
-      eq(ragConversations.isArchived, false)
-    ))
+
+  return db
+    .select()
+    .from(ragConversations)
+    .where(
+      and(
+        eq(ragConversations.userId, userId),
+        eq(ragConversations.isArchived, false)
+      )
+    )
     .orderBy(desc(ragConversations.updatedAt));
 }
 
 /**
  * Archive a conversation
  */
-export async function archiveConversation(conversationId: number, userId: number): Promise<boolean> {
+export async function archiveConversation(
+  conversationId: number,
+  userId: number
+): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
-  
-  const result = await db.update(ragConversations)
+
+  const result = await db
+    .update(ragConversations)
     .set({ isArchived: true })
-    .where(and(
-      eq(ragConversations.id, conversationId),
-      eq(ragConversations.userId, userId)
-    ));
-  
+    .where(
+      and(
+        eq(ragConversations.id, conversationId),
+        eq(ragConversations.userId, userId)
+      )
+    );
+
   return (result as unknown as { affectedRows: number }).affectedRows > 0;
 }
 
 /**
  * Delete a conversation and its messages
  */
-export async function deleteConversation(conversationId: number, userId: number): Promise<boolean> {
+export async function deleteConversation(
+  conversationId: number,
+  userId: number
+): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
-  
+
   // Verify ownership
-  const convs = await db.select().from(ragConversations)
-    .where(and(
-      eq(ragConversations.id, conversationId),
-      eq(ragConversations.userId, userId)
-    ))
+  const convs = await db
+    .select()
+    .from(ragConversations)
+    .where(
+      and(
+        eq(ragConversations.id, conversationId),
+        eq(ragConversations.userId, userId)
+      )
+    )
     .limit(1);
-  
+
   if (convs.length === 0) return false;
-  
+
   // Delete messages first
-  await db.delete(ragMessages).where(eq(ragMessages.conversationId, conversationId));
-  
+  await db
+    .delete(ragMessages)
+    .where(eq(ragMessages.conversationId, conversationId));
+
   // Delete conversation
-  await db.delete(ragConversations).where(eq(ragConversations.id, conversationId));
-  
+  await db
+    .delete(ragConversations)
+    .where(eq(ragConversations.id, conversationId));
+
   return true;
 }
 
@@ -587,50 +652,64 @@ export async function ragChat(
 ): Promise<RAGChatResponse> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   // Get conversation
-  const conversations = await db.select().from(ragConversations)
-    .where(and(
-      eq(ragConversations.id, conversationId),
-      eq(ragConversations.userId, userId)
-    ))
+  const conversations = await db
+    .select()
+    .from(ragConversations)
+    .where(
+      and(
+        eq(ragConversations.id, conversationId),
+        eq(ragConversations.userId, userId)
+      )
+    )
     .limit(1);
-  
+
   if (conversations.length === 0) {
     throw new Error("Conversation not found");
   }
-  
+
   const conversation = conversations[0];
-  
+
   // Save user message
   await db.insert(ragMessages).values({
     conversationId,
     role: "user",
-    content: userMessage
+    content: userMessage,
   });
-  
+
   // Retrieve relevant context
-  const searchResult = await semanticSearch(userId, userMessage, TOP_K_RESULTS, conversationId);
-  
+  const searchResult = await semanticSearch(
+    userId,
+    userMessage,
+    TOP_K_RESULTS,
+    conversationId
+  );
+
   // Build context from retrieved chunks
-  const contextParts = searchResult.chunks.map((chunk, i) => 
-    `[Source ${i + 1}: ${chunk.documentTitle}${chunk.sectionTitle ? ` - ${chunk.sectionTitle}` : ""}]\n${chunk.content}`
+  const contextParts = searchResult.chunks.map(
+    (chunk, i) =>
+      `[Source ${i + 1}: ${chunk.documentTitle}${chunk.sectionTitle ? ` - ${chunk.sectionTitle}` : ""}]\n${chunk.content}`
   );
   const context = contextParts.join("\n\n---\n\n");
-  
+
   // Get conversation history (last 10 messages)
-  const history = await db.select().from(ragMessages)
+  const history = await db
+    .select()
+    .from(ragMessages)
     .where(eq(ragMessages.conversationId, conversationId))
     .orderBy(desc(ragMessages.createdAt))
     .limit(10);
-  
-  const historyMessages = history.reverse().map((m) => ({
+
+  const historyMessages = history.reverse().map(m => ({
     role: m.role as "user" | "assistant" | "system",
-    content: m.content
+    content: m.content,
   }));
-  
+
   // Build system prompt
-  const systemPrompt = conversation.systemPrompt || `You are a helpful AI assistant for the Agents by Valentine RF platform. You help users understand the system's workflows, architecture, and features.
+  const systemPrompt =
+    conversation.systemPrompt ||
+    `You are a helpful AI assistant for the Agents by Valentine RF platform. You help users understand the system's workflows, architecture, and features.
 
 When answering questions:
 1. Use the provided context to give accurate, specific answers
@@ -647,15 +726,18 @@ ${context}`;
     messages: [
       { role: "system", content: systemPrompt },
       ...historyMessages.slice(0, -1), // Exclude the just-added user message from history
-      { role: "user", content: userMessage }
-    ]
+      { role: "user", content: userMessage },
+    ],
   });
-  
+
   const messageContent = response.choices[0].message.content;
-  const assistantContent = typeof messageContent === 'string' ? messageContent : "I apologize, but I couldn't generate a response.";
+  const assistantContent =
+    typeof messageContent === "string"
+      ? messageContent
+      : "I apologize, but I couldn't generate a response.";
   const promptTokens = response.usage?.prompt_tokens || 0;
   const completionTokens = response.usage?.completion_tokens || 0;
-  
+
   // Save assistant message
   await db.insert(ragMessages).values({
     conversationId,
@@ -663,39 +745,47 @@ ${context}`;
     content: assistantContent,
     retrievedChunks: searchResult.chunks,
     promptTokens,
-    completionTokens
+    completionTokens,
   });
-  
+
   // Update conversation stats
-  await db.update(ragConversations)
+  await db
+    .update(ragConversations)
     .set({
       messageCount: sql`${ragConversations.messageCount} + 2`,
       totalTokensUsed: sql`${ragConversations.totalTokensUsed} + ${promptTokens + completionTokens}`,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     })
     .where(eq(ragConversations.id, conversationId));
-  
+
   // Auto-generate title if first message
   if (conversation.messageCount === 0) {
     const titleResponse = await invokeLLM({
       messages: [
-        { role: "system", content: "Generate a short, descriptive title (max 50 chars) for this conversation based on the user's question. Output only the title, no quotes or punctuation." },
-        { role: "user", content: userMessage }
-      ]
+        {
+          role: "system",
+          content:
+            "Generate a short, descriptive title (max 50 chars) for this conversation based on the user's question. Output only the title, no quotes or punctuation.",
+        },
+        { role: "user", content: userMessage },
+      ],
     });
-    
+
     const titleContent = titleResponse.choices[0].message.content;
-    const title = (typeof titleContent === 'string' ? titleContent : "New Conversation").slice(0, 50);
-    await db.update(ragConversations)
+    const title = (
+      typeof titleContent === "string" ? titleContent : "New Conversation"
+    ).slice(0, 50);
+    await db
+      .update(ragConversations)
       .set({ title })
       .where(eq(ragConversations.id, conversationId));
   }
-  
+
   return {
     content: assistantContent,
     retrievedChunks: searchResult.chunks,
     promptTokens,
-    completionTokens
+    completionTokens,
   };
 }
 
@@ -710,30 +800,37 @@ export async function provideFeedback(
 ): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
-  
+
   // Get message
-  const messages = await db.select().from(ragMessages)
+  const messages = await db
+    .select()
+    .from(ragMessages)
     .where(eq(ragMessages.id, messageId))
     .limit(1);
-  
+
   if (messages.length === 0) return false;
-  
+
   const message = messages[0];
-  
+
   // Verify ownership through conversation
-  const convs = await db.select().from(ragConversations)
-    .where(and(
-      eq(ragConversations.id, message.conversationId),
-      eq(ragConversations.userId, visitorUserId)
-    ))
+  const convs = await db
+    .select()
+    .from(ragConversations)
+    .where(
+      and(
+        eq(ragConversations.id, message.conversationId),
+        eq(ragConversations.userId, visitorUserId)
+      )
+    )
     .limit(1);
-  
+
   if (convs.length === 0) return false;
-  
-  await db.update(ragMessages)
+
+  await db
+    .update(ragMessages)
     .set({ feedback, feedbackComment: comment })
     .where(eq(ragMessages.id, messageId));
-  
+
   return true;
 }
 
@@ -786,7 +883,7 @@ The circuit breaker prevents infinite loops when the AI gets stuck:
 - safetyMode: standard, strict, or permissive`,
       source: "system://ralph-loop",
       sourceType: "documentation" as const,
-      tags: ["ralph", "workflow", "core", "sessions"]
+      tags: ["ralph", "workflow", "core", "sessions"],
     },
     {
       title: "Deep Research System",
@@ -832,7 +929,7 @@ The Deep Research system provides AI-powered research capabilities with multi-st
 - And more...`,
       source: "system://deep-research",
       sourceType: "documentation" as const,
-      tags: ["research", "ai", "analysis", "templates"]
+      tags: ["research", "ai", "analysis", "templates"],
     },
     {
       title: "System Architecture",
@@ -879,7 +976,7 @@ Key Services:
 - Role-based access control`,
       source: "system://architecture",
       sourceType: "documentation" as const,
-      tags: ["architecture", "technical", "infrastructure"]
+      tags: ["architecture", "technical", "infrastructure"],
     },
     {
       title: "API Keys and Security",
@@ -910,7 +1007,7 @@ Users can store API keys for multiple AI providers:
 - Monitor usage for anomalies`,
       source: "system://security",
       sourceType: "documentation" as const,
-      tags: ["security", "api-keys", "encryption"]
+      tags: ["security", "api-keys", "encryption"],
     },
     {
       title: "Agent Profiles",
@@ -944,7 +1041,7 @@ Users can store API keys for multiple AI providers:
 - Can be changed between sessions`,
       source: "system://agent-profiles",
       sourceType: "documentation" as const,
-      tags: ["agents", "profiles", "ai"]
+      tags: ["agents", "profiles", "ai"],
     },
     {
       title: "Template Management System",
@@ -984,7 +1081,7 @@ Users can create their own templates with:
 - Public sharing: Make templates available to others`,
       source: "system://templates",
       sourceType: "documentation" as const,
-      tags: ["templates", "research", "configuration"]
+      tags: ["templates", "research", "configuration"],
     },
     {
       title: "Database Schema Reference",
@@ -1037,7 +1134,7 @@ Users can create their own templates with:
 - Fields: id, userId, templateId, templateType`,
       source: "system://database",
       sourceType: "documentation" as const,
-      tags: ["database", "schema", "technical"]
+      tags: ["database", "schema", "technical"],
     },
     {
       title: "Frontend Components Guide",
@@ -1093,7 +1190,7 @@ Sidebar navigation with:
 - Logout button`,
       source: "system://components",
       sourceType: "documentation" as const,
-      tags: ["frontend", "components", "react"]
+      tags: ["frontend", "components", "react"],
     },
     {
       title: "tRPC API Reference",
@@ -1144,7 +1241,7 @@ Sidebar navigation with:
 - createConversation: New chat thread`,
       source: "system://api",
       sourceType: "documentation" as const,
-      tags: ["api", "trpc", "backend"]
+      tags: ["api", "trpc", "backend"],
     },
     {
       title: "Error Handling Patterns",
@@ -1193,7 +1290,7 @@ Sidebar navigation with:
 - Session state preservation`,
       source: "system://errors",
       sourceType: "documentation" as const,
-      tags: ["errors", "debugging", "reliability"]
+      tags: ["errors", "debugging", "reliability"],
     },
     {
       title: "Analytics and Metrics",
@@ -1241,12 +1338,12 @@ Sidebar navigation with:
 - Performance insights`,
       source: "system://analytics",
       sourceType: "documentation" as const,
-      tags: ["analytics", "metrics", "monitoring"]
-    }
+      tags: ["analytics", "metrics", "monitoring"],
+    },
   ];
-  
+
   let totalChunks = 0;
-  
+
   for (const doc of systemDocs) {
     const result = await ingestDocument(
       userId,
@@ -1258,10 +1355,10 @@ Sidebar navigation with:
     );
     totalChunks += result.chunkCount;
   }
-  
+
   return {
     documentsIngested: systemDocs.length,
-    totalChunks
+    totalChunks,
   };
 }
 
@@ -1280,19 +1377,20 @@ export async function saveMessage(
 ): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   const result = await db.insert(ragMessages).values({
     conversationId,
     role,
     content,
     // retrievedChunks is handled separately if needed
   });
-  
+
   // Update conversation timestamp
-  await db.update(ragConversations)
+  await db
+    .update(ragConversations)
     .set({ updatedAt: new Date() })
     .where(eq(ragConversations.id, conversationId));
-  
+
   return Number(result[0].insertId);
 }
 
@@ -1306,7 +1404,7 @@ export async function logSearch(
 ): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  
+
   await db.insert(ragSearchHistory).values({
     userId,
     query,
@@ -1343,42 +1441,51 @@ export async function searchConversations(
   if (!db) {
     return { conversations: [], totalMatches: 0 };
   }
-  
+
   // Search messages containing the query
   const searchPattern = `%${query}%`;
-  
-  const matchedMessages = await db.select({
-    messageId: ragMessages.id,
-    conversationId: ragMessages.conversationId,
-    role: ragMessages.role,
-    content: ragMessages.content,
-    messageCreatedAt: ragMessages.createdAt,
-    convTitle: ragConversations.title,
-    convUpdatedAt: ragConversations.updatedAt,
-  })
+
+  const matchedMessages = await db
+    .select({
+      messageId: ragMessages.id,
+      conversationId: ragMessages.conversationId,
+      role: ragMessages.role,
+      content: ragMessages.content,
+      messageCreatedAt: ragMessages.createdAt,
+      convTitle: ragConversations.title,
+      convUpdatedAt: ragConversations.updatedAt,
+    })
     .from(ragMessages)
-    .innerJoin(ragConversations, eq(ragMessages.conversationId, ragConversations.id))
-    .where(and(
-      eq(ragConversations.userId, userId),
-      eq(ragConversations.isArchived, false),
-      sql`${ragMessages.content} LIKE ${searchPattern}`
-    ))
+    .innerJoin(
+      ragConversations,
+      eq(ragMessages.conversationId, ragConversations.id)
+    )
+    .where(
+      and(
+        eq(ragConversations.userId, userId),
+        eq(ragConversations.isArchived, false),
+        sql`${ragMessages.content} LIKE ${searchPattern}`
+      )
+    )
     .orderBy(desc(ragMessages.createdAt))
     .limit(limit * 3); // Get more messages to group by conversation
-  
+
   // Group by conversation
-  const conversationMap = new Map<number, {
-    id: number;
-    title: string | null;
-    matchedMessages: Array<{
+  const conversationMap = new Map<
+    number,
+    {
       id: number;
-      role: string;
-      content: string;
-      createdAt: Date;
-    }>;
-    updatedAt: Date;
-  }>();
-  
+      title: string | null;
+      matchedMessages: Array<{
+        id: number;
+        role: string;
+        content: string;
+        createdAt: Date;
+      }>;
+      updatedAt: Date;
+    }
+  >();
+
   for (const msg of matchedMessages) {
     if (!conversationMap.has(msg.conversationId)) {
       conversationMap.set(msg.conversationId, {
@@ -1388,22 +1495,26 @@ export async function searchConversations(
         updatedAt: msg.convUpdatedAt,
       });
     }
-    
+
     const conv = conversationMap.get(msg.conversationId)!;
-    if (conv.matchedMessages.length < 3) { // Limit messages per conversation
+    if (conv.matchedMessages.length < 3) {
+      // Limit messages per conversation
       conv.matchedMessages.push({
         id: msg.messageId,
         role: msg.role,
-        content: msg.content.length > 200 ? msg.content.slice(0, 200) + "..." : msg.content,
+        content:
+          msg.content.length > 200
+            ? msg.content.slice(0, 200) + "..."
+            : msg.content,
         createdAt: msg.messageCreatedAt,
       });
     }
   }
-  
+
   const conversations = Array.from(conversationMap.values())
     .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
     .slice(0, limit);
-  
+
   return {
     conversations,
     totalMatches: matchedMessages.length,

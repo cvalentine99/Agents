@@ -2,7 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { Button } from "@/components/ui/button";
-import { X, ChevronLeft, ChevronRight, SkipForward, RotateCcw } from "lucide-react";
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  SkipForward,
+  RotateCcw,
+} from "lucide-react";
 
 interface HighlightRect {
   top: number;
@@ -22,7 +28,9 @@ export function TourOverlay() {
     endTour,
   } = useOnboarding();
 
-  const [highlightRect, setHighlightRect] = useState<HighlightRect | null>(null);
+  const [highlightRect, setHighlightRect] = useState<HighlightRect | null>(
+    null
+  );
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +49,7 @@ export function TourOverlay() {
         if (element) {
           const rect = element.getBoundingClientRect();
           const padding = step.highlightPadding || 10;
-          
+
           setHighlightRect({
             top: rect.top - padding + window.scrollY,
             left: rect.left - padding,
@@ -53,7 +61,7 @@ export function TourOverlay() {
           const tooltipWidth = 380;
           const tooltipHeight = 200;
           const gap = 20;
-          
+
           let tooltipTop = 0;
           let tooltipLeft = 0;
 
@@ -67,11 +75,13 @@ export function TourOverlay() {
               tooltipLeft = rect.left + rect.width / 2 - tooltipWidth / 2;
               break;
             case "left":
-              tooltipTop = rect.top + rect.height / 2 - tooltipHeight / 2 + window.scrollY;
+              tooltipTop =
+                rect.top + rect.height / 2 - tooltipHeight / 2 + window.scrollY;
               tooltipLeft = rect.left - tooltipWidth - gap;
               break;
             case "right":
-              tooltipTop = rect.top + rect.height / 2 - tooltipHeight / 2 + window.scrollY;
+              tooltipTop =
+                rect.top + rect.height / 2 - tooltipHeight / 2 + window.scrollY;
               tooltipLeft = rect.right + gap;
               break;
             default:
@@ -80,7 +90,10 @@ export function TourOverlay() {
           }
 
           // Keep tooltip within viewport
-          tooltipLeft = Math.max(20, Math.min(tooltipLeft, window.innerWidth - tooltipWidth - 20));
+          tooltipLeft = Math.max(
+            20,
+            Math.min(tooltipLeft, window.innerWidth - tooltipWidth - 20)
+          );
           tooltipTop = Math.max(20, tooltipTop);
 
           setTooltipPosition({ top: tooltipTop, left: tooltipLeft });
@@ -99,7 +112,7 @@ export function TourOverlay() {
     };
 
     updatePositions();
-    
+
     // Update on resize
     window.addEventListener("resize", updatePositions);
     return () => window.removeEventListener("resize", updatePositions);
@@ -177,7 +190,8 @@ export function TourOverlay() {
               left: highlightRect.left,
               width: highlightRect.width,
               height: highlightRect.height,
-              boxShadow: "0 0 0 3px #a855f7, 0 0 30px #a855f7, 0 0 60px rgba(168, 85, 247, 0.5)",
+              boxShadow:
+                "0 0 0 3px #a855f7, 0 0 30px #a855f7, 0 0 60px rgba(168, 85, 247, 0.5)",
             }}
           />
         )}
@@ -232,8 +246,8 @@ export function TourOverlay() {
                       index === currentStep
                         ? "bg-purple-500 w-6"
                         : index < currentStep
-                        ? "bg-purple-500/50"
-                        : "bg-gray-600"
+                          ? "bg-purple-500/50"
+                          : "bg-gray-600"
                     }`}
                   />
                 ))}
@@ -287,17 +301,25 @@ export function TourOverlay() {
             {/* Keyboard hints */}
             <div className="px-5 py-2 bg-gray-800/50 border-t border-gray-700/50 flex items-center justify-center gap-4 text-xs text-gray-500">
               <span>
-                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-400">←</kbd>
-                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-400 ml-1">→</kbd>
-                {" "}Navigate
+                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-400">
+                  ←
+                </kbd>
+                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-400 ml-1">
+                  →
+                </kbd>{" "}
+                Navigate
               </span>
               <span>
-                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-400">Enter</kbd>
-                {" "}Next
+                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-400">
+                  Enter
+                </kbd>{" "}
+                Next
               </span>
               <span>
-                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-400">Esc</kbd>
-                {" "}Skip
+                <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-gray-400">
+                  Esc
+                </kbd>{" "}
+                Skip
               </span>
             </div>
           </div>

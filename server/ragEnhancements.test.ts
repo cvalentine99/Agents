@@ -49,8 +49,21 @@ describe("RAG File Upload Service", () => {
 
   describe("Supported File Extensions", () => {
     const SUPPORTED_EXTENSIONS = [
-      ".pdf", ".md", ".txt", ".ts", ".tsx", ".js", ".jsx", 
-      ".py", ".json", ".yaml", ".yml", ".html", ".css", ".sql", ".sh"
+      ".pdf",
+      ".md",
+      ".txt",
+      ".ts",
+      ".tsx",
+      ".js",
+      ".jsx",
+      ".py",
+      ".json",
+      ".yaml",
+      ".yml",
+      ".html",
+      ".css",
+      ".sql",
+      ".sh",
     ];
 
     it("should support PDF files", () => {
@@ -111,7 +124,14 @@ describe("RAG File Upload Service", () => {
 
 describe("RAG Streaming Service", () => {
   describe("SSE Event Types", () => {
-    const eventTypes = ["start", "status", "sources", "chunk", "complete", "error"];
+    const eventTypes = [
+      "start",
+      "status",
+      "sources",
+      "chunk",
+      "complete",
+      "error",
+    ];
 
     it("should define start event type", () => {
       expect(eventTypes).toContain("start");
@@ -143,7 +163,7 @@ describe("RAG Streaming Service", () => {
       const event = "chunk";
       const data = { content: "Hello", index: 0 };
       const formatted = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-      
+
       expect(formatted).toContain("event: chunk");
       expect(formatted).toContain("data:");
       expect(formatted).toContain('"content":"Hello"');
@@ -156,7 +176,7 @@ describe("RAG Streaming Service", () => {
         sourcesUsed: 3,
         timestamp: Date.now(),
       };
-      
+
       expect(completeData).toHaveProperty("timestamp");
       expect(typeof completeData.timestamp).toBe("number");
     });
@@ -166,7 +186,7 @@ describe("RAG Streaming Service", () => {
     it("should split content into words", () => {
       const content = "This is a test response";
       const words = content.split(" ");
-      
+
       expect(words).toHaveLength(5);
       expect(words[0]).toBe("This");
       expect(words[4]).toBe("response");
@@ -175,7 +195,7 @@ describe("RAG Streaming Service", () => {
     it("should handle empty content", () => {
       const content = "";
       const words = content.split(" ").filter(Boolean);
-      
+
       expect(words).toHaveLength(0);
     });
   });
@@ -185,7 +205,7 @@ describe("RAG Conversation Search", () => {
   describe("Search Query Validation", () => {
     it("should require minimum 3 characters", () => {
       const minLength = 3;
-      
+
       expect("ab".length >= minLength).toBe(false);
       expect("abc".length >= minLength).toBe(true);
       expect("search query".length >= minLength).toBe(true);
@@ -203,7 +223,7 @@ describe("RAG Conversation Search", () => {
         conversations: [],
         totalMatches: 0,
       };
-      
+
       expect(searchResult).toHaveProperty("conversations");
       expect(searchResult).toHaveProperty("totalMatches");
     });
@@ -213,10 +233,10 @@ describe("RAG Conversation Search", () => {
         id: 1,
         title: "Test Conversation",
         matchedMessages: [
-          { id: 1, role: "user", content: "test query", createdAt: new Date() }
+          { id: 1, role: "user", content: "test query", createdAt: new Date() },
         ],
       };
-      
+
       expect(conversation).toHaveProperty("matchedMessages");
       expect(conversation.matchedMessages).toHaveLength(1);
     });
@@ -229,11 +249,11 @@ describe("RAG Conversation Search", () => {
         { id: 2, updatedAt: new Date("2025-01-02") },
         { id: 3, updatedAt: new Date("2024-12-31") },
       ];
-      
-      const sorted = results.sort((a, b) => 
-        b.updatedAt.getTime() - a.updatedAt.getTime()
+
+      const sorted = results.sort(
+        (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
       );
-      
+
       expect(sorted[0].id).toBe(2);
       expect(sorted[2].id).toBe(3);
     });
@@ -260,7 +280,7 @@ describe("RAG Helper Functions", () => {
         query: "test search",
         resultCount: 5,
       };
-      
+
       expect(searchLog).toHaveProperty("userId");
       expect(searchLog).toHaveProperty("query");
       expect(searchLog).toHaveProperty("resultCount");

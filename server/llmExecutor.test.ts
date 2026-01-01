@@ -71,7 +71,7 @@ describe("LLM Executor", () => {
   describe("LLM Model Types", () => {
     it("should support all model types", () => {
       const models = ["claude", "codex", "gemini", "manus"] as const;
-      
+
       models.forEach(model => {
         expect(typeof model).toBe("string");
       });
@@ -149,7 +149,9 @@ describe("LLM Executor", () => {
         choices: [{ message: { content: "Generated response from LLM" } }],
       };
 
-      expect(expectedResponse.choices[0].message.content).toBe("Generated response from LLM");
+      expect(expectedResponse.choices[0].message.content).toBe(
+        "Generated response from LLM"
+      );
     });
 
     it("should include token usage in response", async () => {
@@ -215,7 +217,8 @@ describe("LLM Executor", () => {
     });
 
     it("should parse code blocks from response", () => {
-      const response = "Here is the code:\n```typescript\nconsole.log('Hello');\n```";
+      const response =
+        "Here is the code:\n```typescript\nconsole.log('Hello');\n```";
       const codeBlockMatch = response.match(/```[\w]*\n([\s\S]*?)```/);
       const code = codeBlockMatch ? codeBlockMatch[1] : response;
 
@@ -230,9 +233,10 @@ describe("LLM Executor", () => {
 +const y = 2;
  export { x };`;
 
-      const isDiff = diffResponse.includes("---") && 
-                     diffResponse.includes("+++") && 
-                     diffResponse.includes("@@");
+      const isDiff =
+        diffResponse.includes("---") &&
+        diffResponse.includes("+++") &&
+        diffResponse.includes("@@");
 
       expect(isDiff).toBe(true);
     });
@@ -281,7 +285,11 @@ describe("LLM Executor", () => {
       const malformedResponse = "The code looks good but { incomplete";
       const jsonMatch = malformedResponse.match(/\{[\s\S]*\}/);
 
-      let parsed: { issues: string[]; suggestions: string[]; approved: boolean } | null = null;
+      let parsed: {
+        issues: string[];
+        suggestions: string[];
+        approved: boolean;
+      } | null = null;
       try {
         if (jsonMatch) {
           parsed = JSON.parse(jsonMatch[0]);
@@ -289,7 +297,7 @@ describe("LLM Executor", () => {
       } catch {
         // Fall through to default
       }
-      
+
       // If parsing failed or no match, use default
       if (!parsed) {
         parsed = {
@@ -330,7 +338,10 @@ describe("LLM Executor", () => {
       await invokeLLM({
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Analyze this test output:\n\n${testOutput}` },
+          {
+            role: "user",
+            content: `Analyze this test output:\n\n${testOutput}`,
+          },
         ],
       });
 
@@ -339,7 +350,8 @@ describe("LLM Executor", () => {
 
     it("should detect passing tests from output", () => {
       const testOutput = "Tests: 10 passed, 10 total";
-      const passed = testOutput.includes("passed") && !testOutput.includes("failed");
+      const passed =
+        testOutput.includes("passed") && !testOutput.includes("failed");
 
       expect(passed).toBe(true);
     });
@@ -384,7 +396,7 @@ describe("LLM Executor", () => {
       // Test the decrypt function behavior
       // In the actual implementation, decrypt returns the decrypted key
       const encryptedKey = "encrypted-key";
-      
+
       // Verify the mock is set up correctly
       expect(typeof encryptedKey).toBe("string");
       expect(encryptedKey.length).toBeGreaterThan(0);
@@ -401,7 +413,7 @@ describe("LLM Executor", () => {
     it("should handle decryption failure", () => {
       // Test error handling pattern for decryption failures
       let result: string | null = null;
-      
+
       // Simulate decryption failure scenario
       const simulateDecryptionFailure = () => {
         throw new Error("Decryption failed");
@@ -484,9 +496,10 @@ describe("LLM Executor", () => {
         choices: [{ message: { content: "Hello World" } }],
       };
 
-      const content = typeof response.choices[0].message.content === "string"
-        ? response.choices[0].message.content
-        : "";
+      const content =
+        typeof response.choices[0].message.content === "string"
+          ? response.choices[0].message.content
+          : "";
 
       expect(content).toBe("Hello World");
     });
@@ -496,9 +509,10 @@ describe("LLM Executor", () => {
         choices: [{ message: { content: null } }],
       };
 
-      const content = typeof response.choices[0].message.content === "string"
-        ? response.choices[0].message.content
-        : "";
+      const content =
+        typeof response.choices[0].message.content === "string"
+          ? response.choices[0].message.content
+          : "";
 
       expect(content).toBe("");
     });
@@ -649,7 +663,10 @@ describe("LLM Executor Integration Scenarios", () => {
     // Simulate review workflow
     const reviewMessages = [
       { role: "system" as const, content: "Review code" },
-      { role: "user" as const, content: "Review: function add(a,b) { return a+b; }" },
+      {
+        role: "user" as const,
+        content: "Review: function add(a,b) { return a+b; }",
+      },
     ];
 
     expect(reviewMessages).toHaveLength(2);

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Play, 
+import {
+  Play,
   Pause,
   RotateCcw,
   Plus,
   Trash2,
   Check,
   Shield,
-  Zap
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -57,7 +57,7 @@ export function SessionManager({
 
   const addCriterion = () => {
     if (!newCriterion.trim()) return;
-    
+
     onCriteriaChange([
       ...criteria,
       {
@@ -71,21 +71,23 @@ export function SessionManager({
 
   const toggleCriterion = (id: string) => {
     onCriteriaChange(
-      criteria.map((c) =>
-        c.id === id ? { ...c, checked: !c.checked } : c
-      )
+      criteria.map(c => (c.id === id ? { ...c, checked: !c.checked } : c))
     );
   };
 
   const removeCriterion = (id: string) => {
-    onCriteriaChange(criteria.filter((c) => c.id !== id));
+    onCriteriaChange(criteria.filter(c => c.id !== id));
   };
 
-  const completionProgress = criteria.length > 0
-    ? Math.round((criteria.filter((c) => c.checked).length / criteria.length) * 100)
-    : 0;
+  const completionProgress =
+    criteria.length > 0
+      ? Math.round(
+          (criteria.filter(c => c.checked).length / criteria.length) * 100
+        )
+      : 0;
 
-  const promiseSatisfied = criteria.length > 0 && criteria.every((c) => c.checked);
+  const promiseSatisfied =
+    criteria.length > 0 && criteria.every(c => c.checked);
 
   return (
     <div className="cyber-card p-6 space-y-6" data-tour="session-manager">
@@ -121,11 +123,7 @@ export function SessionManager({
               Start
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onResetSession}
-          >
+          <Button variant="ghost" size="sm" onClick={onResetSession}>
             <RotateCcw className="w-4 h-4" />
           </Button>
         </div>
@@ -135,7 +133,9 @@ export function SessionManager({
       <div className="cyber-glass p-4 rounded">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded ${config.ralphMode ? "bg-[var(--cyber-purple)]/20" : "bg-[var(--bg-surface)]"}`}>
+            <div
+              className={`p-2 rounded ${config.ralphMode ? "bg-[var(--cyber-purple)]/20" : "bg-[var(--bg-surface)]"}`}
+            >
               {config.ralphMode ? (
                 <Shield className="w-5 h-5 text-[var(--cyber-purple)]" />
               ) : (
@@ -147,15 +147,17 @@ export function SessionManager({
                 {config.ralphMode ? "RALPH MODE" : "MANUAL MODE"}
               </Label>
               <p className="text-xs text-[var(--text-muted)]">
-                {config.ralphMode 
-                  ? "Autonomous loop with promise gate enforcement" 
+                {config.ralphMode
+                  ? "Autonomous loop with promise gate enforcement"
                   : "One-shot execution without loop control"}
               </p>
             </div>
           </div>
           <Switch
             checked={config.ralphMode}
-            onCheckedChange={(checked) => onConfigChange({ ...config, ralphMode: checked })}
+            onCheckedChange={checked =>
+              onConfigChange({ ...config, ralphMode: checked })
+            }
             disabled={isRunning}
           />
         </div>
@@ -177,7 +179,9 @@ export function SessionManager({
                   </Label>
                   <Slider
                     value={[config.maxIterations]}
-                    onValueChange={([value]) => onConfigChange({ ...config, maxIterations: value })}
+                    onValueChange={([value]) =>
+                      onConfigChange({ ...config, maxIterations: value })
+                    }
                     min={5}
                     max={100}
                     step={5}
@@ -192,7 +196,9 @@ export function SessionManager({
                   </Label>
                   <Slider
                     value={[config.noProgressThreshold]}
-                    onValueChange={([value]) => onConfigChange({ ...config, noProgressThreshold: value })}
+                    onValueChange={([value]) =>
+                      onConfigChange({ ...config, noProgressThreshold: value })
+                    }
                     min={1}
                     max={10}
                     step={1}
@@ -207,7 +213,9 @@ export function SessionManager({
                   </Label>
                   <Switch
                     checked={config.autoAskHuman}
-                    onCheckedChange={(checked) => onConfigChange({ ...config, autoAskHuman: checked })}
+                    onCheckedChange={checked =>
+                      onConfigChange({ ...config, autoAskHuman: checked })
+                    }
                     disabled={isRunning}
                   />
                 </div>
@@ -241,7 +249,7 @@ export function SessionManager({
           <motion.div
             className="h-full"
             style={{
-              background: promiseSatisfied 
+              background: promiseSatisfied
                 ? "var(--status-success)"
                 : "linear-gradient(90deg, var(--cyber-purple) 0%, var(--cyber-cyan) 100%)",
             }}
@@ -252,12 +260,12 @@ export function SessionManager({
 
         {/* Criteria List */}
         <div className="space-y-2">
-          {criteria.map((criterion) => (
+          {criteria.map(criterion => (
             <motion.div
               key={criterion.id}
               className={`flex items-center gap-3 p-3 rounded transition-colors ${
-                criterion.checked 
-                  ? "bg-[var(--status-success)]/10" 
+                criterion.checked
+                  ? "bg-[var(--status-success)]/10"
                   : "cyber-glass"
               }`}
               layout
@@ -273,10 +281,10 @@ export function SessionManager({
               >
                 {criterion.checked && <Check className="w-3 h-3 text-white" />}
               </button>
-              <span 
+              <span
                 className={`flex-1 text-sm ${
-                  criterion.checked 
-                    ? "text-[var(--text-muted)] line-through" 
+                  criterion.checked
+                    ? "text-[var(--text-muted)] line-through"
                     : "text-[var(--text-primary)]"
                 }`}
               >
@@ -298,8 +306,8 @@ export function SessionManager({
           <Input
             placeholder="Add success criterion..."
             value={newCriterion}
-            onChange={(e) => setNewCriterion(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addCriterion()}
+            onChange={e => setNewCriterion(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && addCriterion()}
             className="flex-1 bg-[var(--bg-surface)] border-[var(--color-border)]"
             disabled={isRunning}
           />
@@ -322,16 +330,22 @@ export function SessionManager({
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[var(--cyber-cyan)]" />
-              <span className="text-[var(--text-muted)]">Agent tries to exit</span>
+              <span className="text-[var(--text-muted)]">
+                Agent tries to exit
+              </span>
             </div>
             <span className="text-[var(--text-muted)]">→</span>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[var(--cyber-purple)]" />
-              <span className="text-[var(--text-muted)]">Stop hook intercepts</span>
+              <span className="text-[var(--text-muted)]">
+                Stop hook intercepts
+              </span>
             </div>
             <span className="text-[var(--text-muted)]">→</span>
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${promiseSatisfied ? "bg-[var(--status-success)]" : "bg-[var(--status-error)]"}`} />
+              <div
+                className={`w-2 h-2 rounded-full ${promiseSatisfied ? "bg-[var(--status-success)]" : "bg-[var(--status-error)]"}`}
+              />
               <span className="text-[var(--text-muted)]">
                 {promiseSatisfied ? "Exit allowed" : "Continue loop"}
               </span>

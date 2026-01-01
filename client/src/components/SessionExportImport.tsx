@@ -7,7 +7,7 @@ import {
   Check,
   AlertTriangle,
   Copy,
-  Share2
+  Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -98,7 +98,8 @@ export function SessionExportImport({
         maxIterations: currentSession.maxIterations || 50,
         noProgressThreshold: currentSession.noProgressThreshold || 3,
         circuitBreakerEnabled: currentSession.circuitBreakerEnabled ?? true,
-        dangerouslySkipPermissions: currentSession.dangerouslySkipPermissions ?? true,
+        dangerouslySkipPermissions:
+          currentSession.dangerouslySkipPermissions ?? true,
       },
       completionCriteria: completionCriteria.map(c => ({
         id: c.id,
@@ -137,11 +138,11 @@ export function SessionExportImport({
   const validateImport = (data: unknown): data is SessionExport => {
     if (!data || typeof data !== "object") return false;
     const d = data as Record<string, unknown>;
-    
+
     if (!d.version || typeof d.version !== "string") return false;
     if (!d.session || typeof d.session !== "object") return false;
     if (!Array.isArray(d.completionCriteria)) return false;
-    
+
     return true;
   };
 
@@ -152,16 +153,18 @@ export function SessionExportImport({
 
     try {
       const data = JSON.parse(importText);
-      
+
       if (!validateImport(data)) {
-        setImportError("Invalid session format. Please check the JSON structure.");
+        setImportError(
+          "Invalid session format. Please check the JSON structure."
+        );
         return;
       }
 
       onImport(data);
       setImportSuccess(true);
       setImportText("");
-      
+
       setTimeout(() => {
         setImportDialogOpen(false);
         setImportSuccess(false);
@@ -177,7 +180,7 @@ export function SessionExportImport({
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = event => {
       const text = event.target?.result as string;
       setImportText(text);
     };
@@ -207,10 +210,11 @@ export function SessionExportImport({
               Export Session Configuration
             </DialogTitle>
             <DialogDescription className="text-purple-400/60">
-              Download or copy your session configuration to share with others or use in another project.
+              Download or copy your session configuration to share with others
+              or use in another project.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {/* Preview */}
             <div className="relative">
@@ -236,7 +240,8 @@ export function SessionExportImport({
             {/* Actions */}
             <div className="flex items-center justify-between">
               <div className="text-xs text-purple-400/60">
-                {completionCriteria.length} criteria • {currentSession.model || "claude"} model
+                {completionCriteria.length} criteria •{" "}
+                {currentSession.model || "claude"} model
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -279,10 +284,11 @@ export function SessionExportImport({
               Import Session Configuration
             </DialogTitle>
             <DialogDescription className="text-purple-400/60">
-              Upload a JSON file or paste configuration to import session settings.
+              Upload a JSON file or paste configuration to import session
+              settings.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {/* File Upload */}
             <div className="flex items-center gap-4">
@@ -301,13 +307,15 @@ export function SessionExportImport({
                 <FileJson className="w-4 h-4 mr-2" />
                 Choose File
               </Button>
-              <span className="text-sm text-purple-400/60">or paste JSON below</span>
+              <span className="text-sm text-purple-400/60">
+                or paste JSON below
+              </span>
             </div>
 
             {/* Text Input */}
             <Textarea
               value={importText}
-              onChange={(e) => {
+              onChange={e => {
                 setImportText(e.target.value);
                 setImportError(null);
                 setImportSuccess(false);
@@ -337,7 +345,9 @@ export function SessionExportImport({
                   className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-lg"
                 >
                   <Check className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-green-300">Session imported successfully!</span>
+                  <span className="text-sm text-green-300">
+                    Session imported successfully!
+                  </span>
                 </motion.div>
               )}
             </AnimatePresence>

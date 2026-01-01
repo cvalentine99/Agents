@@ -280,7 +280,13 @@ export async function startCliStream(
   ws: WebSocket,
   params: StartLoopParams
 ): Promise<void> {
-  const { sessionId, userId, model, workingDirectory, prompt: _prompt } = params;
+  const {
+    sessionId,
+    userId,
+    model,
+    workingDirectory,
+    prompt: _prompt,
+  } = params;
   const processKey = `${sessionId}-${Date.now()}`;
 
   // Initialize session state

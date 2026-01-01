@@ -1,15 +1,15 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { 
-  Gauge, 
-  Zap, 
-  Shield, 
-  GitBranch, 
-  Wand2, 
+import {
+  Gauge,
+  Zap,
+  Shield,
+  GitBranch,
+  Wand2,
   Activity,
   ChevronRight,
   Play,
-  Star
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -19,25 +19,29 @@ const features = [
   {
     icon: <Gauge className="w-8 h-8" />,
     title: "Circular Model Wheel",
-    description: "Spin to select from Codex, Claude, Gemini, or Manus with smooth animations",
+    description:
+      "Spin to select from Codex, Claude, Gemini, or Manus with smooth animations",
     color: "var(--cyber-cyan)",
   },
   {
     icon: <Activity className="w-8 h-8" />,
     title: "RALPH Loop+ Flight Computer",
-    description: "Real-time telemetry dashboard with completion promise tracking",
+    description:
+      "Real-time telemetry dashboard with completion promise tracking",
     color: "var(--cyber-purple)",
   },
   {
     icon: <Wand2 className="w-8 h-8" />,
     title: "Power Promptor",
-    description: "Dyslexia-friendly 4-field form with voice input and auto-expansion",
+    description:
+      "Dyslexia-friendly 4-field form with voice input and auto-expansion",
     color: "var(--cyber-magenta)",
   },
   {
     icon: <Shield className="w-8 h-8" />,
     title: "Circuit Breaker",
-    description: "Visual state machine with stuck detection and one-click reset",
+    description:
+      "Visual state machine with stuck detection and one-click reset",
     color: "var(--status-success)",
   },
   {
@@ -62,7 +66,7 @@ export default function Home() {
       {/* Animated Background */}
       <div className="fixed inset-0 z-0">
         {/* Grid */}
-        <div 
+        <div
           className="absolute inset-0 opacity-20"
           style={{
             backgroundImage: `
@@ -73,10 +77,11 @@ export default function Home() {
           }}
         />
         {/* Radial Glow */}
-        <div 
+        <div
           className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full"
           style={{
-            background: "radial-gradient(circle, var(--cyber-purple) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, var(--cyber-purple) 0%, transparent 70%)",
             opacity: 0.15,
             filter: "blur(100px)",
           }}
@@ -94,15 +99,24 @@ export default function Home() {
               AGENTS BY VALENTINE RF
             </span>
           </div>
-          
+
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#how-it-works" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+            <a
+              href="#how-it-works"
+              className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
               How It Works
             </a>
-            <a href="#features" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+            <a
+              href="#features"
+              className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
               Features
             </a>
-            <a href="#about" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+            <a
+              href="#about"
+              className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
               About
             </a>
             {user ? (
@@ -175,8 +189,8 @@ export default function Home() {
                 </Button>
               </Link>
               <a href="#features">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="text-lg px-8 py-6 border-[var(--cyber-purple)] text-[var(--cyber-purple)] hover:bg-[var(--cyber-purple)]/10"
                 >
                   Explore Features
@@ -199,47 +213,59 @@ export default function Home() {
                 <motion.div
                   className="absolute w-64 h-64 rounded-full border-2 border-[var(--cyber-purple)]/30"
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                 />
                 <motion.div
                   className="absolute w-48 h-48 rounded-full border-2 border-[var(--cyber-cyan)]/30"
                   animate={{ rotate: -360 }}
-                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 15,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                 />
                 <motion.div
                   className="absolute w-32 h-32 rounded-full border-2 border-[var(--cyber-magenta)]/30"
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 10,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                 />
-                
+
                 {/* Center */}
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--cyber-purple)] to-[var(--cyber-cyan)] flex items-center justify-center z-10">
                   <Gauge className="w-10 h-10 text-white" />
                 </div>
 
                 {/* Model Labels */}
-                <motion.div 
+                <motion.div
                   className="absolute top-8 font-cyber text-sm text-[var(--cyber-cyan)]"
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   CODEX
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="absolute right-8 font-cyber text-sm text-[var(--cyber-magenta)]"
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
                 >
                   CLAUDE
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="absolute bottom-8 font-cyber text-sm text-[var(--cyber-purple)]"
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity, delay: 1 }}
                 >
                   GEMINI
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="absolute left-8 font-cyber text-sm text-[var(--cyber-yellow)]"
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
@@ -248,12 +274,13 @@ export default function Home() {
                 </motion.div>
               </div>
             </div>
-            
+
             {/* Glow effect */}
-            <div 
+            <div
               className="absolute inset-0 -z-10 blur-3xl opacity-30"
               style={{
-                background: "linear-gradient(135deg, var(--cyber-purple) 0%, var(--cyber-cyan) 100%)",
+                background:
+                  "linear-gradient(135deg, var(--cyber-purple) 0%, var(--cyber-cyan) 100%)",
               }}
             />
           </motion.div>
@@ -279,7 +306,8 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-[var(--text-muted)] max-w-2xl mx-auto"
             >
-              Orchestrate multiple AI models working together in a seamless pipeline
+              Orchestrate multiple AI models working together in a seamless
+              pipeline
             </motion.p>
           </div>
 
@@ -298,8 +326,12 @@ export default function Home() {
                   <div className="w-16 h-16 rounded-full bg-[var(--cyber-cyan)]/20 border-2 border-[var(--cyber-cyan)] flex items-center justify-center mb-3">
                     <Wand2 className="w-8 h-8 text-[var(--cyber-cyan)]" />
                   </div>
-                  <h4 className="font-cyber text-sm font-bold text-[var(--cyber-cyan)] mb-1">SPEC AGENT</h4>
-                  <p className="text-xs text-[var(--text-muted)]">Analyzes requirements & creates specifications</p>
+                  <h4 className="font-cyber text-sm font-bold text-[var(--cyber-cyan)] mb-1">
+                    SPEC AGENT
+                  </h4>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Analyzes requirements & creates specifications
+                  </p>
                 </div>
 
                 {/* Arrow */}
@@ -315,8 +347,12 @@ export default function Home() {
                   <div className="w-16 h-16 rounded-full bg-[var(--cyber-magenta)]/20 border-2 border-[var(--cyber-magenta)] flex items-center justify-center mb-3">
                     <Zap className="w-8 h-8 text-[var(--cyber-magenta)]" />
                   </div>
-                  <h4 className="font-cyber text-sm font-bold text-[var(--cyber-magenta)] mb-1">IMPLEMENTER</h4>
-                  <p className="text-xs text-[var(--text-muted)]">Writes code based on specifications</p>
+                  <h4 className="font-cyber text-sm font-bold text-[var(--cyber-magenta)] mb-1">
+                    IMPLEMENTER
+                  </h4>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Writes code based on specifications
+                  </p>
                 </div>
 
                 {/* Arrow */}
@@ -332,8 +368,12 @@ export default function Home() {
                   <div className="w-16 h-16 rounded-full bg-[var(--cyber-yellow)]/20 border-2 border-[var(--cyber-yellow)] flex items-center justify-center mb-3">
                     <GitBranch className="w-8 h-8 text-[var(--cyber-yellow)]" />
                   </div>
-                  <h4 className="font-cyber text-sm font-bold text-[var(--cyber-yellow)] mb-1">REVIEWER</h4>
-                  <p className="text-xs text-[var(--text-muted)]">Reviews code quality & suggests improvements</p>
+                  <h4 className="font-cyber text-sm font-bold text-[var(--cyber-yellow)] mb-1">
+                    REVIEWER
+                  </h4>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Reviews code quality & suggests improvements
+                  </p>
                 </div>
 
                 {/* Arrow */}
@@ -349,8 +389,12 @@ export default function Home() {
                   <div className="w-16 h-16 rounded-full bg-[var(--status-success)]/20 border-2 border-[var(--status-success)] flex items-center justify-center mb-3">
                     <Shield className="w-8 h-8 text-[var(--status-success)]" />
                   </div>
-                  <h4 className="font-cyber text-sm font-bold text-[var(--status-success)] mb-1">VERIFIER</h4>
-                  <p className="text-xs text-[var(--text-muted)]">Runs tests & validates completion</p>
+                  <h4 className="font-cyber text-sm font-bold text-[var(--status-success)] mb-1">
+                    VERIFIER
+                  </h4>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Runs tests & validates completion
+                  </p>
                 </div>
               </div>
             </div>
@@ -369,9 +413,12 @@ export default function Home() {
               <div className="w-12 h-12 rounded-full bg-[var(--cyber-cyan)]/20 flex items-center justify-center mx-auto mb-4">
                 <Zap className="w-6 h-6 text-[var(--cyber-cyan)]" />
               </div>
-              <h4 className="font-cyber text-lg font-bold text-[var(--cyber-cyan)] mb-2">CODEX</h4>
+              <h4 className="font-cyber text-lg font-bold text-[var(--cyber-cyan)] mb-2">
+                CODEX
+              </h4>
               <p className="text-sm text-[var(--text-muted)]">
-                OpenAI's code-specialized model for rapid code generation and completion
+                OpenAI's code-specialized model for rapid code generation and
+                completion
               </p>
             </motion.div>
 
@@ -386,9 +433,12 @@ export default function Home() {
               <div className="w-12 h-12 rounded-full bg-[var(--cyber-magenta)]/20 flex items-center justify-center mx-auto mb-4">
                 <Activity className="w-6 h-6 text-[var(--cyber-magenta)]" />
               </div>
-              <h4 className="font-cyber text-lg font-bold text-[var(--cyber-magenta)] mb-2">CLAUDE</h4>
+              <h4 className="font-cyber text-lg font-bold text-[var(--cyber-magenta)] mb-2">
+                CLAUDE
+              </h4>
               <p className="text-sm text-[var(--text-muted)]">
-                Anthropic's assistant excelling at reasoning, analysis, and safe code practices
+                Anthropic's assistant excelling at reasoning, analysis, and safe
+                code practices
               </p>
             </motion.div>
 
@@ -403,9 +453,12 @@ export default function Home() {
               <div className="w-12 h-12 rounded-full bg-[var(--cyber-purple)]/20 flex items-center justify-center mx-auto mb-4">
                 <Star className="w-6 h-6 text-[var(--cyber-purple)]" />
               </div>
-              <h4 className="font-cyber text-lg font-bold text-[var(--cyber-purple)] mb-2">GEMINI</h4>
+              <h4 className="font-cyber text-lg font-bold text-[var(--cyber-purple)] mb-2">
+                GEMINI
+              </h4>
               <p className="text-sm text-[var(--text-muted)]">
-                Google's multimodal AI with strong context understanding and code analysis
+                Google's multimodal AI with strong context understanding and
+                code analysis
               </p>
             </motion.div>
 
@@ -420,9 +473,12 @@ export default function Home() {
               <div className="w-12 h-12 rounded-full bg-[var(--cyber-yellow)]/20 flex items-center justify-center mx-auto mb-4">
                 <Gauge className="w-6 h-6 text-[var(--cyber-yellow)]" />
               </div>
-              <h4 className="font-cyber text-lg font-bold text-[var(--cyber-yellow)] mb-2">MANUS</h4>
+              <h4 className="font-cyber text-lg font-bold text-[var(--cyber-yellow)] mb-2">
+                MANUS
+              </h4>
               <p className="text-sm text-[var(--text-muted)]">
-                Integrated AI agent for autonomous task execution and workflow automation
+                Integrated AI agent for autonomous task execution and workflow
+                automation
               </p>
             </motion.div>
           </div>
@@ -435,27 +491,44 @@ export default function Home() {
             className="mt-16 max-w-4xl mx-auto"
           >
             <div className="cyber-glass p-8 rounded-xl">
-              <h3 className="font-cyber text-xl font-bold text-center mb-6 neon-text-purple">HOW IT WORKS</h3>
+              <h3 className="font-cyber text-xl font-bold text-center mb-6 neon-text-purple">
+                HOW IT WORKS
+              </h3>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <div className="text-3xl font-cyber font-bold text-[var(--cyber-cyan)] mb-2">1</div>
-                  <h4 className="font-semibold text-[var(--text-primary)] mb-2">Select Your Model</h4>
+                  <div className="text-3xl font-cyber font-bold text-[var(--cyber-cyan)] mb-2">
+                    1
+                  </div>
+                  <h4 className="font-semibold text-[var(--text-primary)] mb-2">
+                    Select Your Model
+                  </h4>
                   <p className="text-sm text-[var(--text-muted)]">
-                    Spin the wheel or manually choose the AI model best suited for your task
+                    Spin the wheel or manually choose the AI model best suited
+                    for your task
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-cyber font-bold text-[var(--cyber-magenta)] mb-2">2</div>
-                  <h4 className="font-semibold text-[var(--text-primary)] mb-2">Define Your Promise</h4>
+                  <div className="text-3xl font-cyber font-bold text-[var(--cyber-magenta)] mb-2">
+                    2
+                  </div>
+                  <h4 className="font-semibold text-[var(--text-primary)] mb-2">
+                    Define Your Promise
+                  </h4>
                   <p className="text-sm text-[var(--text-muted)]">
-                    Set completion criteria that the agent must fulfill before exiting
+                    Set completion criteria that the agent must fulfill before
+                    exiting
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-cyber font-bold text-[var(--status-success)] mb-2">3</div>
-                  <h4 className="font-semibold text-[var(--text-primary)] mb-2">Watch It Work</h4>
+                  <div className="text-3xl font-cyber font-bold text-[var(--status-success)] mb-2">
+                    3
+                  </div>
+                  <h4 className="font-semibold text-[var(--text-primary)] mb-2">
+                    Watch It Work
+                  </h4>
                   <p className="text-sm text-[var(--text-muted)]">
-                    The RALPH Loop ensures your agent keeps working until all criteria are met
+                    The RALPH Loop ensures your agent keeps working until all
+                    criteria are met
                   </p>
                 </div>
               </div>
@@ -465,14 +538,18 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative z-10 py-20 bg-[var(--bg-deep)]">
+      <section
+        id="features"
+        className="relative z-10 py-20 bg-[var(--bg-deep)]"
+      >
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="font-cyber text-3xl md:text-4xl font-bold mb-4">
               <span className="neon-text-purple">NEXT-GEN</span> FEATURES
             </h2>
             <p className="text-[var(--text-muted)] max-w-2xl mx-auto">
-              Everything you need to orchestrate autonomous coding loops with multiple AI models
+              Everything you need to orchestrate autonomous coding loops with
+              multiple AI models
             </p>
           </div>
 
@@ -486,9 +563,9 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="cyber-card p-6 hover:border-[var(--cyber-purple)]/50 transition-colors group"
               >
-                <div 
+                <div
                   className="w-14 h-14 rounded-lg flex items-center justify-center mb-4 transition-all group-hover:scale-110"
-                  style={{ 
+                  style={{
                     backgroundColor: `${feature.color}20`,
                     color: feature.color,
                   }}
@@ -515,14 +592,15 @@ export default function Home() {
               POWERED BY <span className="neon-text-cyan">RALPH LOOP+</span>
             </h2>
             <p className="text-[var(--text-secondary)] mb-8">
-              RALPH (Recursive Agent Loop with Promise Handling) is a framework that creates 
-              persistent feedback loops for AI coding agents. The stop hook intercepts exit 
-              attempts and checks your completion promise—if the criteria aren't met, 
-              the loop continues until the job is done.
+              RALPH (Recursive Agent Loop with Promise Handling) is a framework
+              that creates persistent feedback loops for AI coding agents. The
+              stop hook intercepts exit attempts and checks your completion
+              promise—if the criteria aren't met, the loop continues until the
+              job is done.
             </p>
             <div className="cyber-glass p-6 rounded-lg text-left font-mono text-sm">
               <pre className="text-[var(--text-secondary)] overflow-x-auto">
-{`# The RALPH Loop Flow
+                {`# The RALPH Loop Flow
 ┌─────────────────────────────────────────┐
 │  Claude tries to exit                   │
 │           ↓                             │
@@ -545,8 +623,7 @@ export default function Home() {
       <footer className="relative z-10 border-t border-[var(--color-border)] py-8">
         <div className="container mx-auto px-6 text-center">
           <p className="text-sm text-[var(--text-muted)]">
-            Built with{" "}
-            <span className="text-[var(--cyber-purple)]">♥</span>{" "}
+            Built with <span className="text-[var(--cyber-purple)]">♥</span>{" "}
             using RALPH Loop+ Framework
           </p>
         </div>
