@@ -722,5 +722,11 @@
 - [x] Add ptyService.test.ts for terminal testing (39 tests)
 - [x] Add llmExecutor.test.ts for LLM testing (45 tests)
 - [x] Add websocket.test.ts for WebSocket endpoint testing (53 tests)
-- [ ] Add deepResearchEngine.test.ts for research testing
+- [x] Add deepResearchEngine.test.ts for research testing (38 tests)
 - [ ] Expand auth.logout.test.ts to cover all auth scenarios
+
+## Integration Tests & CI/CD
+- [x] Create RALPH Loop integration tests (22 tests - end-to-end session simulation)
+- [x] Create Deep Research Engine tests (38 tests - 400+ lines coverage)
+- [x] Set up GitHub Actions CI/CD pipeline (.github/workflows/ci.yml)
+- [x] Verify all tests pass (502 tests across 25 files)
