@@ -313,7 +313,7 @@ export async function startCliStream(
     const commandStr = `${command} ${args.map(a => a.includes(" ") ? `"${a}"` : a).join(" ")}`;
     // Note: cliExecutions.sessionId is int, but we're using string sessionId
     // For now, we'll skip creating the execution record and just log
-    console.log(`Starting CLI execution for session ${sessionId}: ${commandStr.substring(0, 100)}...`);
+    console.info(`Starting CLI execution for session ${sessionId}: ${commandStr.substring(0, 100)}...`);
     
     // Update session status to running
     await db.updateSession(sessionId, { status: "running" });
@@ -423,7 +423,7 @@ export async function startCliStream(
       
       // Note: CLI execution updates would need the execution ID
       // For now, we log the completion details
-      console.log(`Session ${sessionId} completed with exit code ${code}`);
+      console.info(`Session ${sessionId} completed with exit code ${code}`);
       
       sendMessage(ws, {
         type: "complete",
