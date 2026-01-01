@@ -24,7 +24,9 @@ vi.mock("fs", () => ({
 
 vi.mock("./_core/llm", () => ({
   invokeLLM: vi.fn().mockResolvedValue({
-    choices: [{ message: { content: "Generated code" }, finish_reason: "stop" }],
+    choices: [
+      { message: { content: "Generated code" }, finish_reason: "stop" },
+    ],
     usage: { total_tokens: 100 },
   }),
 }));
@@ -64,7 +66,14 @@ describe("RALPH Loop Integration Tests", () => {
       const emitter = new EventEmitter();
 
       // Track all events
-      ["started", "log", "iterationStart", "iterationComplete", "stateChange", "complete"].forEach(event => {
+      [
+        "started",
+        "log",
+        "iterationStart",
+        "iterationComplete",
+        "stateChange",
+        "complete",
+      ].forEach(event => {
         emitter.on(event, (data: any) => {
           sessionEvents.push({ event, data });
         });
@@ -93,8 +102,12 @@ describe("RALPH Loop Integration Tests", () => {
       // Simulate iterations
       for (let i = 1; i <= 5; i++) {
         emitter.emit("iterationStart", config.sessionId, i);
-        emitter.emit("log", config.sessionId, `Iteration ${i}: Analyzing code...`);
-        emitter.emit("iterationComplete", config.sessionId, i, { 
+        emitter.emit(
+          "log",
+          config.sessionId,
+          `Iteration ${i}: Analyzing code...`
+        );
+        emitter.emit("iterationComplete", config.sessionId, i, {
           filesModified: [`src/file${i}.ts`],
           testsPassed: i * 2,
           testsFailed: Math.max(0, 5 - i),
@@ -110,8 +123,12 @@ describe("RALPH Loop Integration Tests", () => {
 
       // Verify session lifecycle
       expect(sessionEvents.find(e => e.event === "started")).toBeDefined();
-      expect(sessionEvents.filter(e => e.event === "iterationStart")).toHaveLength(5);
-      expect(sessionEvents.filter(e => e.event === "iterationComplete")).toHaveLength(5);
+      expect(
+        sessionEvents.filter(e => e.event === "iterationStart")
+      ).toHaveLength(5);
+      expect(
+        sessionEvents.filter(e => e.event === "iterationComplete")
+      ).toHaveLength(5);
       expect(sessionEvents.find(e => e.event === "complete")).toBeDefined();
     });
 
@@ -133,7 +150,7 @@ describe("RALPH Loop Integration Tests", () => {
       for (let i = 0; i < 3; i++) {
         state.currentIteration++;
         state.noProgressCount++;
-        
+
         if (state.noProgressCount >= 3) {
           state.circuitBreaker = "OPEN";
           state.status = "paused";
@@ -178,13 +195,18 @@ describe("RALPH Loop Integration Tests", () => {
   describe("Multi-File Code Generation", () => {
     it("should track modifications across multiple files", () => {
       const filesModified: string[] = [];
-      const fileChanges: Map<string, { before: string; after: string }> = new Map();
+      const fileChanges: Map<string, { before: string; after: string }> =
+        new Map();
 
       // Simulate multi-file changes
       const changes = [
         { file: "src/App.tsx", before: "old code", after: "new code" },
         { file: "src/components/Todo.tsx", before: "", after: "new component" },
-        { file: "src/utils/helpers.ts", before: "helper v1", after: "helper v2" },
+        {
+          file: "src/utils/helpers.ts",
+          before: "helper v1",
+          after: "helper v2",
+        },
         { file: "src/App.tsx", before: "new code", after: "final code" }, // Same file modified again
       ];
 
@@ -192,7 +214,10 @@ describe("RALPH Loop Integration Tests", () => {
         if (!filesModified.includes(change.file)) {
           filesModified.push(change.file);
         }
-        fileChanges.set(change.file, { before: change.before, after: change.after });
+        fileChanges.set(change.file, {
+          before: change.before,
+          after: change.after,
+        });
       });
 
       expect(filesModified).toHaveLength(3); // Unique files
@@ -217,7 +242,11 @@ describe("RALPH Loop Integration Tests", () => {
 
   describe("Test Execution Flow", () => {
     it("should parse and track test results across iterations", () => {
-      const testHistory: Array<{ iteration: number; passed: number; failed: number }> = [];
+      const testHistory: Array<{
+        iteration: number;
+        passed: number;
+        failed: number;
+      }> = [];
 
       // Simulate test results over iterations
       const results = [
@@ -292,7 +321,7 @@ describe("RALPH Loop Integration Tests", () => {
   describe("Error Recovery Scenarios", () => {
     it("should handle build errors gracefully", () => {
       const errors: string[] = [];
-      let status: RalphState["status"] = "running";
+      const status: RalphState["status"] = "running";
 
       // Simulate build error
       const buildError = "TypeScript error: Cannot find module './missing'";
@@ -468,7 +497,11 @@ describe("RALPH Loop Integration Tests", () => {
 
   describe("Auto-Sign Suggestions Integration", () => {
     it("should record failures for auto-sign analysis", () => {
-      const failures: Array<{ iteration: number; error: string; context: string }> = [];
+      const failures: Array<{
+        iteration: number;
+        error: string;
+        context: string;
+      }> = [];
 
       // Record failures
       failures.push({
@@ -537,7 +570,11 @@ describe("RALPH Loop End-to-End Scenarios", () => {
       goal: "Add user authentication",
       steps: [
         { step: 1, action: "Create auth module", files: ["src/auth/index.ts"] },
-        { step: 2, action: "Add login component", files: ["src/components/Login.tsx"] },
+        {
+          step: 2,
+          action: "Add login component",
+          files: ["src/components/Login.tsx"],
+        },
         { step: 3, action: "Add auth tests", files: ["src/auth/auth.test.ts"] },
         { step: 4, action: "Integrate with app", files: ["src/App.tsx"] },
       ],

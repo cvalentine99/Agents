@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Activity, 
@@ -7,9 +7,7 @@ import {
   XCircle,
   TrendingUp,
   TrendingDown,
-  Clock,
-  Cpu,
-  HardDrive
+  Clock
 } from "lucide-react";
 import {
   LineChart,
@@ -54,7 +52,7 @@ export function LiveMonitor({
   totalDuration,
   isRunning,
 }: LiveMonitorProps) {
-  const [activeTab, setActiveTab] = useState<"errors" | "tests" | "diffs">("diffs");
+  const [_activeTab, _setActiveTab] = useState<"errors" | "tests" | "diffs">("diffs");
 
   // Calculate trends
   const lastMetric = metrics[metrics.length - 1];

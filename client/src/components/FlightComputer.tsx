@@ -10,9 +10,7 @@ import {
   Pause,
   Square
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { IntegratedTerminal } from "@/components/IntegratedTerminal";
 import { FullTerminal } from "@/components/FullTerminal";
 import { DirectoryPicker } from "@/components/DirectoryPicker";
 import { CompletionCriteriaEditor, CompletionCriterion } from "@/components/CompletionCriteriaEditor";
@@ -66,7 +64,7 @@ export function FlightComputer({
   onStop,
   onResetBreaker,
 }: FlightComputerProps) {
-  const getBreakerColor = (state: CircuitBreakerState) => {
+  const _getBreakerColor = (state: CircuitBreakerState) => {
     switch (state) {
       case "CLOSED": return "var(--breaker-closed)";
       case "HALF_OPEN": return "var(--breaker-half-open)";

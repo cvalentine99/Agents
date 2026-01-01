@@ -5,7 +5,7 @@
  * RALPH Loop execution. Users can accept (add to PROMPT.md) or dismiss suggestions.
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -83,7 +83,7 @@ export function AutoSignSuggestions({
 
       refetchSuggestions();
       onSignAdded?.();
-    } catch (error) {
+    } catch (_err) {
       toast.error("Failed to add sign");
     }
   };
@@ -96,7 +96,7 @@ export function AutoSignSuggestions({
         sign: suggestion.sign,
       });
       refetchSuggestions();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to dismiss suggestion");
     }
   };
@@ -128,7 +128,7 @@ export function AutoSignSuggestions({
       } else {
         toast.error("Could not generate a sign for this error");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate custom sign");
     } finally {
       setGeneratingCustom(false);

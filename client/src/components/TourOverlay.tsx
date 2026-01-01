@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useOnboarding, TourStep } from "@/contexts/OnboardingContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 import { Button } from "@/components/ui/button";
 import { X, ChevronLeft, ChevronRight, SkipForward, RotateCcw } from "lucide-react";
 

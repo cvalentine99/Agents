@@ -15,7 +15,6 @@ import {
   Code,
   FileCode,
   Loader2,
-  X,
   ChevronDown,
   ChevronUp,
   Library,
@@ -238,7 +237,7 @@ export function AgentProfiles({ selectedProfile, onSelectProfile, disabled }: Ag
     };
   });
 
-  const allProfiles = [...builtInProfiles, ...customProfiles];
+  const _allProfiles = [...builtInProfiles, ...customProfiles];
 
   const handleCreate = () => {
     if (editingProfile) {

@@ -42,7 +42,7 @@ export function FullTerminal({
   onExit,
   onClose,
   isExpanded = true,
-  onToggleExpand,
+  onToggleExpand: _onToggleExpand,
   className = '',
 }: FullTerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null);

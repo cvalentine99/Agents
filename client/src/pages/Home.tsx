@@ -55,7 +55,7 @@ const features = [
 ];
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading: _loading } = useAuth();
 
   return (
     <div className="min-h-screen bg-[var(--bg-void)] overflow-hidden">

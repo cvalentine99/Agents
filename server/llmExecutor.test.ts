@@ -58,7 +58,6 @@ vi.mock("./_core/llm", () => ({
 }));
 
 import { invokeLLM } from "./_core/llm";
-import { decrypt } from "./crypto";
 
 describe("LLM Executor", () => {
   beforeEach(() => {

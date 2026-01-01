@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, BookOpen, Brain, CheckCircle2, ChevronRight, Clock, Copy, Download, FileDown, FileText, FileUp, Flame, Folder, FolderPlus, Heart, LayoutTemplate, Link2, Loader2, MessageSquare, Palette, Plus, Search, Send, Settings, Share2, Sparkles, Star, Trash2, TrendingUp, Upload, User, X, Zap } from "lucide-react";
+import { AlertCircle, BookOpen, Brain, CheckCircle2, Clock, Copy, Download, FileDown, FileText, Flame, Folder, FolderPlus, LayoutTemplate, Link2, Loader2, MessageSquare, Plus, Search, Send, Settings, Share2, Sparkles, Star, Trash2, TrendingUp, Upload, User, X, Zap } from "lucide-react";
 import { RESEARCH_TEMPLATES, RESEARCH_CATEGORIES, type ResearchCategory, type ResearchTemplate, searchTemplates, getTemplatesByCategory } from "@/data/researchTemplates";
 import { Streamdown } from "streamdown";
 import { formatDistanceToNow } from "date-fns";
@@ -46,7 +46,7 @@ export default function DeepResearch() {
   
   // Category management state
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<{ id: number; name: string; description: string; color: string } | null>(null);
+  const [_editingCategory, setEditingCategory] = useState<{ id: number; name: string; description: string; color: string } | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [newCategoryColor, setNewCategoryColor] = useState("#8b5cf6");
@@ -60,7 +60,7 @@ export default function DeepResearch() {
   
   // Queries
   const { data: sessions, isLoading: sessionsLoading } = trpc.research.list.useQuery();
-  const { data: selectedSession, isLoading: sessionLoading } = trpc.research.get.useQuery(
+  const { data: selectedSession, isLoading: _sessionLoading } = trpc.research.get.useQuery(
     { id: selectedSessionId! },
     { enabled: !!selectedSessionId, refetchInterval: (query) => query.state.data?.status === "researching" ? 2000 : false }
   );
@@ -126,7 +126,7 @@ export default function DeepResearch() {
     },
   });
   
-  const { data: exportData, refetch: exportMarkdown } = trpc.research.exportMarkdown.useQuery(
+  const { data: _exportData, refetch: exportMarkdown } = trpc.research.exportMarkdown.useQuery(
     { id: selectedSessionId! },
     { enabled: false }
   );
@@ -202,7 +202,7 @@ export default function DeepResearch() {
     },
   });
   
-  const updateCategoryMutation = trpc.templates.updateCategory.useMutation({
+  const _updateCategoryMutation = trpc.templates.updateCategory.useMutation({
     onSuccess: () => {
       toast.success("Category updated!");
       setEditingCategory(null);
@@ -357,7 +357,7 @@ export default function DeepResearch() {
         categories: parsed.categories,
         createMissingCategories: true,
       });
-    } catch (e) {
+    } catch (__e) {
       setImportError("Invalid JSON format");
     }
   };

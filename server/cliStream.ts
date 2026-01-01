@@ -7,18 +7,28 @@ import { decrypt } from "./crypto";
 const activeProcesses: Map<string, ChildProcess> = new Map();
 
 // Store session state for iteration tracking
-const sessionState: Map<string, {
-  iteration: number;
-  filesModified: string[];
-  testsRun: number;
-  testsPassed: number;
-  errors: number;
-  diffLines: number;
-  startTime: number;
-}> = new Map();
+const sessionState: Map<
+  string,
+  {
+    iteration: number;
+    filesModified: string[];
+    testsRun: number;
+    testsPassed: number;
+    errors: number;
+    diffLines: number;
+    startTime: number;
+  }
+> = new Map();
 
 interface StreamMessage {
-  type: "stdout" | "stderr" | "status" | "error" | "complete" | "progress" | "iteration";
+  type:
+    | "stdout"
+    | "stderr"
+    | "status"
+    | "error"
+    | "complete"
+    | "progress"
+    | "iteration";
   data: string;
   timestamp: number;
   iteration?: number;
@@ -48,41 +58,50 @@ interface StartLoopParams {
 /**
  * Build the CLI command based on the selected model
  */
-function buildCommand(params: StartLoopParams, apiKey: string): { command: string; args: string[]; env: Record<string, string> } {
-  const { model, prompt, maxIterations, dangerouslySkipPermissions, agentProfile } = params;
-  
+function buildCommand(
+  params: StartLoopParams,
+  apiKey: string
+): { command: string; args: string[]; env: Record<string, string> } {
+  const {
+    model,
+    prompt,
+    maxIterations,
+    dangerouslySkipPermissions,
+    agentProfile,
+  } = params;
+
   // Build the full prompt with agent profile context
   let fullPrompt = prompt;
   if (agentProfile) {
     const profileContext = getAgentProfileContext(agentProfile);
     fullPrompt = `${profileContext}\n\n${prompt}`;
   }
-  
+
   const baseEnv: Record<string, string> = {};
-  
+
   switch (model) {
     case "claude": {
       const claudeArgs: string[] = [];
-      
+
       // Add dangerous skip permissions first if enabled
       if (dangerouslySkipPermissions) {
         claudeArgs.push("--dangerously-skip-permissions");
       }
-      
+
       // Add print flag and prompt
       claudeArgs.push("--print", fullPrompt);
-      
+
       // Add max turns
       claudeArgs.push("--max-turns", String(maxIterations));
-      
+
       // Set API key in environment
       if (apiKey) {
         baseEnv.ANTHROPIC_API_KEY = apiKey;
       }
-      
+
       return { command: "claude", args: claudeArgs, env: baseEnv };
     }
-      
+
     case "codex":
       // OpenAI Codex CLI
       if (apiKey) {
@@ -93,7 +112,7 @@ function buildCommand(params: StartLoopParams, apiKey: string): { command: strin
         args: ["--prompt", fullPrompt, "--full-auto"],
         env: baseEnv,
       };
-      
+
     case "gemini":
       // Google Gemini CLI
       if (apiKey) {
@@ -104,7 +123,7 @@ function buildCommand(params: StartLoopParams, apiKey: string): { command: strin
         args: ["--prompt", fullPrompt],
         env: baseEnv,
       };
-      
+
     case "manus":
       // Manus CLI
       return {
@@ -112,7 +131,7 @@ function buildCommand(params: StartLoopParams, apiKey: string): { command: strin
         args: ["run", "--prompt", fullPrompt],
         env: baseEnv,
       };
-      
+
     default:
       throw new Error(`Unknown model: ${model}`);
   }
@@ -131,7 +150,7 @@ Rules:
 - Output only the changed code, not full files
 - Prefer surgical fixes over rewrites
 - Skip explanations unless asked`;
-      
+
     case "architect_owl":
       return `You are Architect Owl - a thoughtful design agent focused on architecture and tradeoffs.
 Rules:
@@ -140,7 +159,7 @@ Rules:
 - Explain tradeoffs between different approaches
 - Suggest patterns and best practices
 - Ask clarifying questions when requirements are ambiguous`;
-      
+
     case "test_gremlin":
       return `You are Test Gremlin - a test-first development agent.
 Rules:
@@ -149,7 +168,7 @@ Rules:
 - Include edge cases and error scenarios
 - Use appropriate testing patterns (unit, integration, e2e)
 - Ensure tests are readable and maintainable`;
-      
+
     case "refactor_surgeon":
       return `You are Refactor Surgeon - a safe refactoring agent.
 Rules:
@@ -158,7 +177,7 @@ Rules:
 - Extract functions, reduce duplication, improve naming
 - Never change functionality without explicit permission
 - Document any behavioral changes`;
-      
+
     default:
       return "";
   }
@@ -183,7 +202,7 @@ function parseOutputForProgress(text: string, state: SessionState): void {
     /(?:Created|Modified|Updated|Wrote|Writing)\s+(?:file\s+)?[`']?([^\s`']+\.[a-zA-Z]+)[`']?/gi,
     /(?:File|Path):\s*([^\s]+\.[a-zA-Z]+)/gi,
   ];
-  
+
   for (const pattern of filePatterns) {
     let match;
     while ((match = pattern.exec(text)) !== null) {
@@ -193,52 +212,49 @@ function parseOutputForProgress(text: string, state: SessionState): void {
       }
     }
   }
-  
+
   // Detect test results
   const testPatterns = [
     /(\d+)\s+(?:tests?|specs?)\s+(?:passed|passing)/i,
     /(?:passed|passing):\s*(\d+)/i,
     /✓\s+(\d+)\s+(?:tests?|specs?)/i,
   ];
-  
+
   for (const pattern of testPatterns) {
     const match = text.match(pattern);
     if (match) {
       state.testsPassed = Math.max(state.testsPassed, parseInt(match[1], 10));
     }
   }
-  
+
   const totalTestPatterns = [
     /(\d+)\s+(?:tests?|specs?)\s+(?:total|run)/i,
     /(?:total|ran):\s*(\d+)/i,
   ];
-  
+
   for (const pattern of totalTestPatterns) {
     const match = text.match(pattern);
     if (match) {
       state.testsRun = Math.max(state.testsRun, parseInt(match[1], 10));
     }
   }
-  
+
   // Detect errors
   const errorPatterns = [
     /(?:error|failed|failure)s?:\s*(\d+)/i,
     /(\d+)\s+(?:errors?|failures?)/i,
   ];
-  
+
   for (const pattern of errorPatterns) {
     const match = text.match(pattern);
     if (match) {
       state.errors = Math.max(state.errors, parseInt(match[1], 10));
     }
   }
-  
+
   // Count diff lines (rough estimate from output)
-  const diffLinePatterns = [
-    /^\+[^+]/gm,
-    /^-[^-]/gm,
-  ];
-  
+  const diffLinePatterns = [/^\+[^+]/gm, /^-[^-]/gm];
+
   for (const pattern of diffLinePatterns) {
     const matches = text.match(pattern);
     if (matches) {
@@ -251,7 +267,8 @@ function parseOutputForProgress(text: string, state: SessionState): void {
  * Send a message through WebSocket
  */
 function sendMessage(ws: WebSocket, message: StreamMessage) {
-  if (ws.readyState === 1) { // WebSocket.OPEN = 1
+  if (ws.readyState === 1) {
+    // WebSocket.OPEN = 1
     ws.send(JSON.stringify(message));
   }
 }
@@ -263,9 +280,9 @@ export async function startCliStream(
   ws: WebSocket,
   params: StartLoopParams
 ): Promise<void> {
-  const { sessionId, userId, model, workingDirectory, prompt } = params;
+  const { sessionId, userId, model, workingDirectory, prompt: _prompt } = params;
   const processKey = `${sessionId}-${Date.now()}`;
-  
+
   // Initialize session state
   sessionState.set(sessionId, {
     iteration: 1,
@@ -276,18 +293,18 @@ export async function startCliStream(
     diffLines: 0,
     startTime: Date.now(),
   });
-  
+
   const state = sessionState.get(sessionId)!;
-  
+
   try {
     // Get API key for the model
     const apiKeyRecord = await db.getApiKeyForProvider(userId, model);
     let apiKey = "";
-    
+
     if (apiKeyRecord) {
       try {
         apiKey = decrypt(apiKeyRecord.encryptedKey);
-      } catch (e) {
+      } catch (__e) {
         sendMessage(ws, {
           type: "error",
           data: `Failed to decrypt API key for ${model}. Please check your API key in Settings.`,
@@ -306,19 +323,21 @@ export async function startCliStream(
         return;
       }
     }
-    
+
     // Build command
     const { command, args, env: cmdEnv } = buildCommand(params, apiKey);
-    
+
     // Create CLI execution record
-    const commandStr = `${command} ${args.map(a => a.includes(" ") ? `"${a}"` : a).join(" ")}`;
+    const commandStr = `${command} ${args.map(a => (a.includes(" ") ? `"${a}"` : a)).join(" ")}`;
     // Note: cliExecutions.sessionId is int, but we're using string sessionId
     // For now, we'll skip creating the execution record and just log
-    console.info(`Starting CLI execution for session ${sessionId}: ${commandStr.substring(0, 100)}...`);
-    
+    console.info(
+      `Starting CLI execution for session ${sessionId}: ${commandStr.substring(0, 100)}...`
+    );
+
     // Update session status to running
     await db.updateSession(sessionId, { status: "running" });
-    
+
     // Merge environment variables
     const env = {
       ...process.env,
@@ -326,41 +345,41 @@ export async function startCliStream(
       // Ensure PATH includes common CLI locations
       PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin:${process.env.HOME}/.local/bin`,
     };
-    
+
     sendMessage(ws, {
       type: "status",
       data: `🚀 Starting ${model.toUpperCase()} CLI in ${workingDirectory || "current directory"}...`,
       timestamp: Date.now(),
       iteration: state.iteration,
     });
-    
+
     sendMessage(ws, {
       type: "status",
       data: `📋 Command: ${command} ${args.slice(0, 2).join(" ")}...`,
       timestamp: Date.now(),
       iteration: state.iteration,
     });
-    
+
     // Spawn the process
     const child = spawn(command, args, {
       cwd: workingDirectory || process.cwd(),
       env: env as NodeJS.ProcessEnv,
       shell: true,
     });
-    
+
     activeProcesses.set(processKey, child);
-    
+
     // Buffer for accumulating output
     let outputBuffer = "";
-    
+
     // Stream stdout
     child.stdout?.on("data", (data: Buffer) => {
       const text = data.toString();
       outputBuffer += text;
-      
+
       // Parse for progress updates
       parseOutputForProgress(text, state);
-      
+
       sendMessage(ws, {
         type: "stdout",
         data: text,
@@ -375,9 +394,13 @@ export async function startCliStream(
           duration: Math.floor((Date.now() - state.startTime) / 1000),
         },
       });
-      
+
       // Detect iteration changes (Claude outputs iteration markers)
-      if (text.includes("Turn") || text.includes("Iteration") || text.includes("Step")) {
+      if (
+        text.includes("Turn") ||
+        text.includes("Iteration") ||
+        text.includes("Step")
+      ) {
         const iterMatch = text.match(/(?:Turn|Iteration|Step)\s*(\d+)/i);
         if (iterMatch) {
           const newIteration = parseInt(iterMatch[1], 10);
@@ -393,14 +416,14 @@ export async function startCliStream(
         }
       }
     });
-    
+
     // Stream stderr
     child.stderr?.on("data", (data: Buffer) => {
       const text = data.toString();
-      
+
       // Some CLIs output progress to stderr
       parseOutputForProgress(text, state);
-      
+
       sendMessage(ws, {
         type: "stderr",
         data: text,
@@ -408,29 +431,30 @@ export async function startCliStream(
         iteration: state.iteration,
       });
     });
-    
+
     // Handle process exit
-    child.on("close", async (code) => {
+    child.on("close", async code => {
       activeProcesses.delete(processKey);
-      
+
       const duration = Math.floor((Date.now() - state.startTime) / 1000);
       const status = code === 0 ? "complete" : "failed";
-      
+
       // Update session status
       await db.updateSession(sessionId, {
         status,
         currentIteration: state.iteration,
       });
-      
+
       // Note: CLI execution updates would need the execution ID
       // For now, we log the completion details
       console.info(`Session ${sessionId} completed with exit code ${code}`);
-      
+
       sendMessage(ws, {
         type: "complete",
-        data: code === 0 
-          ? `✅ Process completed successfully after ${state.iteration} iteration(s)`
-          : `❌ Process exited with code ${code}`,
+        data:
+          code === 0
+            ? `✅ Process completed successfully after ${state.iteration} iteration(s)`
+            : `❌ Process exited with code ${code}`,
         timestamp: Date.now(),
         iteration: state.iteration,
         exitCode: code ?? undefined,
@@ -443,41 +467,40 @@ export async function startCliStream(
           duration,
         },
       });
-      
+
       // Cleanup session state
       sessionState.delete(sessionId);
     });
-    
+
     // Handle process error
-    child.on("error", async (error) => {
+    child.on("error", async error => {
       activeProcesses.delete(processKey);
-      
+
       // Update session status
       await db.updateSession(sessionId, { status: "failed" });
-      
+
       let errorMessage = error.message;
       if (error.message.includes("ENOENT")) {
         errorMessage = `Command '${command}' not found. Please ensure ${model} CLI is installed and in your PATH.`;
       }
-      
+
       sendMessage(ws, {
         type: "error",
         data: `❌ Process error: ${errorMessage}`,
         timestamp: Date.now(),
         iteration: state.iteration,
       });
-      
+
       // Cleanup session state
       sessionState.delete(sessionId);
     });
-    
-  } catch (error) {
+  } catch (_error) {
     sendMessage(ws, {
       type: "error",
-      data: `❌ Failed to start CLI: ${error instanceof Error ? error.message : "Unknown error"}`,
+      data: `❌ Failed to start CLI: ${_error instanceof Error ? _error.message : "Unknown error"}`,
       timestamp: Date.now(),
     });
-    
+
     // Cleanup session state
     sessionState.delete(sessionId);
   }
@@ -494,13 +517,13 @@ export function stopCliProcess(sessionId: string): boolean {
       if (process) {
         process.kill("SIGTERM");
         activeProcesses.delete(key);
-        
+
         // Update session status
         db.updateSession(sessionId, { status: "paused" }).catch(console.error);
-        
+
         // Cleanup session state
         sessionState.delete(sessionId);
-        
+
         return true;
       }
     }

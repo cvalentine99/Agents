@@ -3,7 +3,6 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { 
@@ -75,7 +74,7 @@ function ApiKeyCard({ provider }: { provider: Provider }) {
   const { data: existingKey, isLoading } = trpc.apiKeys.getForProvider.useQuery({ provider });
   
   const saveMutation = trpc.apiKeys.save.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       toast.success(`${config.name} API key saved successfully`);
       setApiKey("");
       setIsEditing(false);

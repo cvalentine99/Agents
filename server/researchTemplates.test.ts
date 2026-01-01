@@ -3,8 +3,7 @@ import {
   RESEARCH_TEMPLATES, 
   RESEARCH_CATEGORIES, 
   searchTemplates, 
-  getTemplatesByCategory,
-  type ResearchCategory 
+  getTemplatesByCategory 
 } from "../client/src/data/researchTemplates";
 
 describe("Research Templates", () => {

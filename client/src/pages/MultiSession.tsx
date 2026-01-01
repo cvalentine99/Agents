@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   ArrowLeft, 
@@ -10,14 +10,7 @@ import {
   Pause,
   Square,
   RefreshCw,
-  Settings,
   Terminal,
-  Activity,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Clock,
-  Cpu,
   Layers,
   LayoutGrid,
   Columns,
@@ -80,10 +73,10 @@ export default function MultiSession() {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('grid');
   const [maximizedPane, setMaximizedPane] = useState<string | null>(null);
   
-  const { notifyLoopComplete, notifyLoopFailed, notifyCircuitBreakerOpen } = useNotifications();
+  const { notifyLoopComplete, notifyLoopFailed: _notifyLoopFailed, notifyCircuitBreakerOpen } = useNotifications();
 
   // Fetch active sessions
-  const { data: sessions } = trpc.sessions.list.useQuery();
+  const { data: _sessions } = trpc.sessions.list.useQuery();
 
   const addPane = () => {
     const newId = `pane-${Date.now()}`;

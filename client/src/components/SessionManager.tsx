@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Settings, 
   Play, 
   Pause,
   RotateCcw,
   Plus,
   Trash2,
   Check,
-  Square,
   Shield,
   Zap
 } from "lucide-react";

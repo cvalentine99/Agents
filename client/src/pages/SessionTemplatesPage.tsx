@@ -47,30 +47,30 @@ export default function SessionTemplatesPage() {
       toast.success("Template deleted");
       utils.sessionTemplates.list.invalidate();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(`Failed to delete: ${error.message}`);
     },
   });
 
   const useTemplate = trpc.sessionTemplates.use.useMutation({
-    onSuccess: (template) => {
+    onSuccess: template => {
       toast.success(`Loading "${template.name}"...`);
       // Navigate to dashboard with template data
       navigate(`/dashboard?templateId=${template.id}`);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(`Failed to load template: ${error.message}`);
     },
   });
 
   // Get all unique tags from templates
   const allTags = Array.from(
-    new Set(templates?.flatMap((t) => t.tags) || [])
+    new Set(templates?.flatMap(t => t.tags) || [])
   ).sort();
 
   // Filter and sort templates
   const filteredTemplates = templates
-    ?.filter((template) => {
+    ?.filter(template => {
       const matchesSearch =
         !searchQuery ||
         template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -194,7 +194,7 @@ export default function SessionTemplatesPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
               <Input
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search templates..."
                 className="pl-10 bg-black/50 border-purple-500/30 text-white placeholder:text-gray-500"
               />
@@ -203,7 +203,7 @@ export default function SessionTemplatesPage() {
             {/* Tag filter */}
             <Select
               value={selectedTag || "all"}
-              onValueChange={(v) => setSelectedTag(v === "all" ? null : v)}
+              onValueChange={v => setSelectedTag(v === "all" ? null : v)}
             >
               <SelectTrigger className="w-[150px] bg-black/50 border-purple-500/30 text-white">
                 <Filter className="h-4 w-4 mr-2 text-purple-400" />
@@ -211,7 +211,7 @@ export default function SessionTemplatesPage() {
               </SelectTrigger>
               <SelectContent className="bg-gray-900 border-purple-500/30">
                 <SelectItem value="all">All Tags</SelectItem>
-                {allTags.map((tag) => (
+                {allTags.map(tag => (
                   <SelectItem key={tag} value={tag}>
                     {tag}
                   </SelectItem>
@@ -222,7 +222,7 @@ export default function SessionTemplatesPage() {
             {/* Model filter */}
             <Select
               value={selectedModel || "all"}
-              onValueChange={(v) => setSelectedModel(v === "all" ? null : v)}
+              onValueChange={v => setSelectedModel(v === "all" ? null : v)}
             >
               <SelectTrigger className="w-[150px] bg-black/50 border-purple-500/30 text-white">
                 <Bot className="h-4 w-4 mr-2 text-cyan-400" />
@@ -238,10 +238,7 @@ export default function SessionTemplatesPage() {
             </Select>
 
             {/* Sort */}
-            <Select
-              value={sortBy}
-              onValueChange={(v) => setSortBy(v as SortBy)}
-            >
+            <Select value={sortBy} onValueChange={v => setSortBy(v as SortBy)}>
               <SelectTrigger className="w-[150px] bg-black/50 border-purple-500/30 text-white">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -256,9 +253,7 @@ export default function SessionTemplatesPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() =>
-                setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-              }
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
               className="text-purple-300 hover:text-white hover:bg-purple-500/20"
             >
               {sortOrder === "asc" ? (
@@ -338,7 +333,7 @@ export default function SessionTemplatesPage() {
           </div>
         ) : filteredTemplates && filteredTemplates.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredTemplates.map((template) => (
+            {filteredTemplates.map(template => (
               <SessionTemplateCard
                 key={template.id}
                 template={template as any}

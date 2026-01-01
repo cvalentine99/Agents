@@ -12,7 +12,7 @@
 
 import { getDb } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
-import { projectPrompts, promptSigns, type InsertProjectPrompt, type InsertPromptSign } from "../drizzle/schema";
+import { projectPrompts, promptSigns } from "../drizzle/schema";
 
 // Default PROMPT.md template based on Ralph Loop best practices
 export const DEFAULT_PROMPT_TEMPLATE = `# PROMPT.md - Ralph Loop Configuration

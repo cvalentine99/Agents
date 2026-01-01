@@ -39,7 +39,7 @@ export interface CodeGenerationResult {
 /**
  * Get decrypted API key for a model
  */
-async function getApiKey(userId: number, model: LLMModel): Promise<string | null> {
+async function _getApiKey(userId: number, model: LLMModel): Promise<string | null> {
   const keyRecord = await db
     .select()
     .from(apiKeys)
@@ -63,7 +63,7 @@ async function getApiKey(userId: number, model: LLMModel): Promise<string | null
 export async function callLLM(
   messages: LLMMessage[],
   model: LLMModel = 'claude',
-  userId?: string
+  _userId?: string
 ): Promise<LLMResponse> {
   // Use built-in Manus LLM (already configured)
   const response = await invokeLLM({

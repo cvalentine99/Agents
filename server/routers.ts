@@ -12,7 +12,6 @@ import * as ragFileUpload from "./ragFileUpload";
 import * as promptMd from "./promptMd";
 import * as autoSign from "./autoSignSuggestions";
 import * as fileBrowser from "./fileBrowser";
-import * as deepResearch from "./deepResearchEngine";
 
 // Session configuration schema
 const sessionConfigSchema = z.object({
@@ -260,7 +259,7 @@ export const appRouter = router({
         if (!session || session.userId !== ctx.user.id) {
           throw new Error("Session not found or access denied");
         }
-        const result = await db.createCliExecution(input);
+        const _result = await db.createCliExecution(input);
         return { success: true };
       }),
 

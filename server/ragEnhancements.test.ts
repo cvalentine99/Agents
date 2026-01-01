@@ -9,7 +9,6 @@ vi.mock("./ragFileUpload", () => ({
 }));
 
 // Import after mocking
-import * as fileUpload from "./ragFileUpload";
 
 describe("RAG File Upload Service", () => {
   beforeEach(() => {

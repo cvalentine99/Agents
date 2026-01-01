@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   Select,
   SelectContent,
@@ -23,9 +23,7 @@ import {
   RefreshCw,
   Activity,
   Zap,
-  Filter,
-  Download,
-  Upload
+  Filter
 } from "lucide-react";
 import { SessionExportImport, type SessionExport } from "@/components/SessionExportImport";
 import { Link, useLocation } from "wouter";
@@ -81,7 +79,7 @@ const modelColors: Record<string, string> = {
 };
 
 export default function SessionHistory() {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user: _user, loading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   

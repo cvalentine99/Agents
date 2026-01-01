@@ -14,9 +14,7 @@ import {
   ragMessages,
   ragSearchHistory,
   type RagDocument,
-  type RagChunk,
-  type RagConversation,
-  type RagMessage
+  type RagConversation
 } from "../drizzle/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import crypto from "crypto";
@@ -1278,7 +1276,7 @@ export async function saveMessage(
   conversationId: number,
   role: "user" | "assistant",
   content: string,
-  metadata?: { retrievedChunks?: number[] }
+  _metadata?: { retrievedChunks?: number[] }
 ): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

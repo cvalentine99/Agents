@@ -8,8 +8,6 @@
  * Ralph gets tuned - like a guitar."
  */
 
-import { getDb } from "./db";
-import { eq, and, desc, gte, sql } from "drizzle-orm";
 import { invokeLLM } from "./_core/llm";
 
 // Extended failure patterns with more specific detection

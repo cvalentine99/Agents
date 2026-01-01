@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { generatePDFFilename } from "./pdfGenerator";
 
 // Note: We don't test generateResearchPDF directly as it requires puppeteer browser

@@ -65,8 +65,8 @@ export function useNotifications() {
       const result = await Notification.requestPermission();
       setPermission(result);
       return result === 'granted';
-    } catch (error) {
-      console.error('Error requesting notification permission:', error);
+    } catch (_error) {
+      console.error('Error requesting notification permission:', _error);
       return false;
     }
   }, []);
@@ -80,7 +80,7 @@ export function useNotifications() {
       audio.play().catch(() => {
         // Ignore autoplay restrictions
       });
-    } catch (error) {
+    } catch (_err) {
       // Ignore sound errors
     }
   }, [settings.sound]);

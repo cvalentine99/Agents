@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, 
-  X, 
-  Home,
+  Menu,
+  X,
   Settings,
   Gauge,
   Wand2,
@@ -22,7 +21,7 @@ import {
   Layers,
   Save,
   Search,
-  Brain
+  Brain,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -31,7 +30,10 @@ import { Button } from "@/components/ui/button";
 
 // Import all components
 import { ModelWheel, type ModelType } from "@/components/ModelWheel";
-import { FlightComputer, type CircuitBreakerState, type LoopStatus } from "@/components/FlightComputer";
+import {
+  type CircuitBreakerState,
+  type LoopStatus,
+} from "@/components/FlightComputer";
 import { RalphLoopController } from "@/components/RalphLoopController";
 import { PowerPromptor } from "@/components/PowerPromptor";
 import { AgentProfiles, type AgentProfile } from "@/components/AgentProfiles";
@@ -39,24 +41,71 @@ import { CircuitBreakerViz } from "@/components/CircuitBreakerViz";
 import { AssemblyLine, defaultStages } from "@/components/AssemblyLine";
 import { DiffViewer, parseDiff } from "@/components/DiffViewer";
 import { PromptPacks, type PromptPack } from "@/components/PromptPacks";
-import { SessionManager, defaultSessionConfig, type SessionConfig, type CompletionCriterion } from "@/components/SessionManager";
-import { LiveMonitor, type LoopMetric, type FileChange } from "@/components/LiveMonitor";
+import {
+  SessionManager,
+  defaultSessionConfig,
+  type SessionConfig,
+  type CompletionCriterion,
+} from "@/components/SessionManager";
+import {
+  LiveMonitor,
+  type LoopMetric,
+  type FileChange,
+} from "@/components/LiveMonitor";
 import { SaveAsTemplateModal } from "@/components/SaveAsTemplateModal";
 import { TourTrigger } from "@/components/TourTrigger";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { toast } from "sonner";
 
-type NavSection = "wheel" | "flight" | "promptor" | "agents" | "breaker" | "assembly" | "diff" | "packs" | "session" | "monitor";
+type NavSection =
+  | "wheel"
+  | "flight"
+  | "promptor"
+  | "agents"
+  | "breaker"
+  | "assembly"
+  | "diff"
+  | "packs"
+  | "session"
+  | "monitor";
 
 const navItems: { id: NavSection; label: string; icon: React.ReactNode }[] = [
   { id: "wheel", label: "Model Wheel", icon: <Gauge className="w-5 h-5" /> },
-  { id: "flight", label: "Flight Computer", icon: <Activity className="w-5 h-5" /> },
-  { id: "promptor", label: "Power Promptor", icon: <Wand2 className="w-5 h-5" /> },
-  { id: "agents", label: "Agent Profiles", icon: <Users className="w-5 h-5" /> },
-  { id: "session", label: "Session Manager", icon: <Settings className="w-5 h-5" /> },
-  { id: "assembly", label: "Assembly Line", icon: <GitBranch className="w-5 h-5" /> },
-  { id: "breaker", label: "Circuit Breaker", icon: <Shield className="w-5 h-5" /> },
-  { id: "monitor", label: "Live Monitor", icon: <Activity className="w-5 h-5" /> },
+  {
+    id: "flight",
+    label: "Flight Computer",
+    icon: <Activity className="w-5 h-5" />,
+  },
+  {
+    id: "promptor",
+    label: "Power Promptor",
+    icon: <Wand2 className="w-5 h-5" />,
+  },
+  {
+    id: "agents",
+    label: "Agent Profiles",
+    icon: <Users className="w-5 h-5" />,
+  },
+  {
+    id: "session",
+    label: "Session Manager",
+    icon: <Settings className="w-5 h-5" />,
+  },
+  {
+    id: "assembly",
+    label: "Assembly Line",
+    icon: <GitBranch className="w-5 h-5" />,
+  },
+  {
+    id: "breaker",
+    label: "Circuit Breaker",
+    icon: <Shield className="w-5 h-5" />,
+  },
+  {
+    id: "monitor",
+    label: "Live Monitor",
+    icon: <Activity className="w-5 h-5" />,
+  },
   { id: "diff", label: "Diff Viewer", icon: <FileCode className="w-5 h-5" /> },
   { id: "packs", label: "Prompt Packs", icon: <Package className="w-5 h-5" /> },
 ];
@@ -79,29 +128,37 @@ export default function Dashboard() {
 
   // State for all components
   const [selectedModel, setSelectedModel] = useState<ModelType>("claude");
-  const [selectedProfile, setSelectedProfile] = useState<AgentProfile>("patch_goblin");
-  const [sessionConfig, setSessionConfig] = useState<SessionConfig>(defaultSessionConfig);
-  const [completionCriteria, setCompletionCriteria] = useState<CompletionCriterion[]>([
+  const [selectedProfile, setSelectedProfile] =
+    useState<AgentProfile>("patch_goblin");
+  const [sessionConfig, setSessionConfig] =
+    useState<SessionConfig>(defaultSessionConfig);
+  const [completionCriteria, setCompletionCriteria] = useState<
+    CompletionCriterion[]
+  >([
     { id: "1", text: "All tests pass", checked: false },
     { id: "2", text: "Build succeeds", checked: false },
     { id: "3", text: "No TypeScript errors", checked: false },
   ]);
   const [isSessionRunning, setIsSessionRunning] = useState(false);
   const [loopStatus, setLoopStatus] = useState<LoopStatus>("IDLE");
-  const [circuitBreakerState, setCircuitBreakerState] = useState<CircuitBreakerState>("CLOSED");
+  const [circuitBreakerState, setCircuitBreakerState] =
+    useState<CircuitBreakerState>("CLOSED");
   const [currentIteration, setCurrentIteration] = useState(0);
-  const [completionProgress, setCompletionProgress] = useState(0);
+  const [_completionProgress, setCompletionProgress] = useState(0);
   const [noProgressCount, setNoProgressCount] = useState(0);
   const [stages, setStages] = useState(defaultStages);
   const [isPipelineRunning, setIsPipelineRunning] = useState(false);
   const [metrics, setMetrics] = useState<LoopMetric[]>([]);
   const [recentFiles, setRecentFiles] = useState<FileChange[]>([]);
   const [totalDuration, setTotalDuration] = useState(0);
-  const [workingDirectory, setWorkingDirectory] = useState("");
-  const [sessionId, setSessionId] = useState<string>(`session-${Date.now().toString(36)}`);
+  const [_workingDirectory, _setWorkingDirectory] = useState("");
+  const [sessionId, _setSessionId] = useState<string>(
+    `session-${Date.now().toString(36)}`
+  );
 
   // Sample diff for demo
-  const [diffFiles, setDiffFiles] = useState(() => parseDiff(`diff --git a/src/App.tsx b/src/App.tsx
+  const [diffFiles, setDiffFiles] = useState(() =>
+    parseDiff(`diff --git a/src/App.tsx b/src/App.tsx
 --- a/src/App.tsx
 +++ b/src/App.tsx
 @@ -1,5 +1,7 @@
@@ -115,13 +172,16 @@ export default function Dashboard() {
 +    <div>Count: {count}</div>
    );
  }
-`));
+`)
+  );
 
   // Calculate completion progress
   useEffect(() => {
     if (completionCriteria.length > 0) {
       const checked = completionCriteria.filter(c => c.checked).length;
-      setCompletionProgress(Math.round((checked / completionCriteria.length) * 100));
+      setCompletionProgress(
+        Math.round((checked / completionCriteria.length) * 100)
+      );
     }
   }, [completionCriteria]);
 
@@ -160,8 +220,13 @@ export default function Dashboard() {
         setRecentFiles(prev => [
           {
             path: `src/components/Component${Math.floor(Math.random() * 10)}.tsx`,
-            type: ["added", "modified", "deleted"][Math.floor(Math.random() * 3)] as "added" | "modified" | "deleted",
-            lines: { added: Math.floor(Math.random() * 20), removed: Math.floor(Math.random() * 10) },
+            type: ["added", "modified", "deleted"][
+              Math.floor(Math.random() * 3)
+            ] as "added" | "modified" | "deleted",
+            lines: {
+              added: Math.floor(Math.random() * 20),
+              removed: Math.floor(Math.random() * 10),
+            },
             timestamp: Date.now(),
           },
           ...prev.slice(0, 9),
@@ -197,7 +262,7 @@ export default function Dashboard() {
   };
 
   const handleModelChange = (stageId: string, model: ModelType) => {
-    setStages(prev => prev.map(s => s.id === stageId ? { ...s, model } : s));
+    setStages(prev => prev.map(s => (s.id === stageId ? { ...s, model } : s)));
   };
 
   const handleRunPipeline = () => {
@@ -207,25 +272,41 @@ export default function Dashboard() {
   };
 
   const handleApproveHunk = (fileIndex: number, hunkId: string) => {
-    setDiffFiles(prev => prev.map((f, i) => 
-      i === fileIndex 
-        ? { ...f, hunks: f.hunks.map(h => h.id === hunkId ? { ...h, approved: true } : h) }
-        : f
-    ));
+    setDiffFiles(prev =>
+      prev.map((f, i) =>
+        i === fileIndex
+          ? {
+              ...f,
+              hunks: f.hunks.map(h =>
+                h.id === hunkId ? { ...h, approved: true } : h
+              ),
+            }
+          : f
+      )
+    );
   };
 
   const handleDenyHunk = (fileIndex: number, hunkId: string) => {
-    setDiffFiles(prev => prev.map((f, i) => 
-      i === fileIndex 
-        ? { ...f, hunks: f.hunks.map(h => h.id === hunkId ? { ...h, approved: false } : h) }
-        : f
-    ));
+    setDiffFiles(prev =>
+      prev.map((f, i) =>
+        i === fileIndex
+          ? {
+              ...f,
+              hunks: f.hunks.map(h =>
+                h.id === hunkId ? { ...h, approved: false } : h
+              ),
+            }
+          : f
+      )
+    );
   };
 
   const handleToggleFile = (fileIndex: number) => {
-    setDiffFiles(prev => prev.map((f, i) => 
-      i === fileIndex ? { ...f, expanded: !f.expanded } : f
-    ));
+    setDiffFiles(prev =>
+      prev.map((f, i) =>
+        i === fileIndex ? { ...f, expanded: !f.expanded } : f
+      )
+    );
   };
 
   const handleSelectPack = (pack: PromptPack) => {
@@ -243,7 +324,10 @@ export default function Dashboard() {
     switch (activeSection) {
       case "wheel":
         return (
-          <div className="flex flex-col items-center justify-center min-h-[600px]" data-tour="model-wheel">
+          <div
+            className="flex flex-col items-center justify-center min-h-[600px]"
+            data-tour="model-wheel"
+          >
             <ModelWheel
               selectedModel={selectedModel}
               onSelectModel={setSelectedModel}
@@ -251,7 +335,7 @@ export default function Dashboard() {
             />
           </div>
         );
-      
+
       case "flight":
         return (
           <RalphLoopController
@@ -266,7 +350,7 @@ export default function Dashboard() {
               doneWhen: completionCriteria.map(c => c.text).join(", "),
               doNot: "Do not break existing functionality",
             }}
-            onStateChange={(state) => {
+            onStateChange={state => {
               setLoopStatus(state.status);
               setCurrentIteration(state.currentIteration);
               setCompletionProgress(state.completionProgress);
@@ -275,7 +359,7 @@ export default function Dashboard() {
             }}
           />
         );
-      
+
       case "promptor":
         return (
           <PowerPromptor
@@ -285,7 +369,7 @@ export default function Dashboard() {
             }}
           />
         );
-      
+
       case "agents":
         return (
           <AgentProfiles
@@ -294,7 +378,7 @@ export default function Dashboard() {
             disabled={isSessionRunning}
           />
         );
-      
+
       case "breaker":
         return (
           <CircuitBreakerViz
@@ -309,7 +393,7 @@ export default function Dashboard() {
             }}
           />
         );
-      
+
       case "assembly":
         return (
           <AssemblyLine
@@ -319,7 +403,7 @@ export default function Dashboard() {
             isRunning={isPipelineRunning}
           />
         );
-      
+
       case "diff":
         return (
           <DiffViewer
@@ -336,14 +420,10 @@ export default function Dashboard() {
             hasCheckpoint={true}
           />
         );
-      
+
       case "packs":
-        return (
-          <PromptPacks
-            onSelectPack={handleSelectPack}
-          />
-        );
-      
+        return <PromptPacks onSelectPack={handleSelectPack} />;
+
       case "session":
         return (
           <div className="space-y-4">
@@ -383,7 +463,7 @@ export default function Dashboard() {
             />
           </div>
         );
-      
+
       case "monitor":
         return (
           <LiveMonitor
@@ -394,7 +474,7 @@ export default function Dashboard() {
             isRunning={isSessionRunning}
           />
         );
-      
+
       default:
         return null;
     }
@@ -449,8 +529,11 @@ export default function Dashboard() {
         </div>
 
         {/* Nav Items */}
-        <nav className="flex-1 p-2 space-y-1 overflow-y-auto" data-tour="sidebar-nav">
-          {navItems.map((item) => {
+        <nav
+          className="flex-1 p-2 space-y-1 overflow-y-auto"
+          data-tour="sidebar-nav"
+        >
+          {navItems.map(item => {
             const isActive = activeSection === item.id;
             return (
               <button
@@ -637,7 +720,9 @@ export default function Dashboard() {
                     exit={{ opacity: 0, x: -10 }}
                     className="flex-1 min-w-0"
                   >
-                    <p className="text-sm font-medium truncate">{user.name || "User"}</p>
+                    <p className="text-sm font-medium truncate">
+                      {user.name || "User"}
+                    </p>
                     <button
                       onClick={() => logout()}
                       className="text-xs text-[var(--text-muted)] hover:text-[var(--status-error)] flex items-center gap-1"
@@ -695,9 +780,13 @@ export default function Dashboard() {
                 className="lg:hidden p-2 hover:bg-[var(--bg-surface)] rounded"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
               </button>
-              
+
               <h1 className="font-cyber text-xl font-bold">
                 {navItems.find(n => n.id === activeSection)?.label}
               </h1>
@@ -709,11 +798,15 @@ export default function Dashboard() {
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--bg-surface)]">
                 <motion.div
                   className={`w-2 h-2 rounded-full ${
-                    loopStatus === "RUNNING" ? "bg-[var(--status-success)]" :
-                    loopStatus === "PAUSED" ? "bg-[var(--cyber-yellow)]" :
-                    loopStatus === "COMPLETE" ? "bg-[var(--cyber-cyan)]" :
-                    loopStatus === "FAILED" ? "bg-[var(--status-error)]" :
-                    "bg-[var(--text-muted)]"
+                    loopStatus === "RUNNING"
+                      ? "bg-[var(--status-success)]"
+                      : loopStatus === "PAUSED"
+                        ? "bg-[var(--cyber-yellow)]"
+                        : loopStatus === "COMPLETE"
+                          ? "bg-[var(--cyber-cyan)]"
+                          : loopStatus === "FAILED"
+                            ? "bg-[var(--status-error)]"
+                            : "bg-[var(--text-muted)]"
                   }`}
                   animate={{
                     scale: loopStatus === "RUNNING" ? [1, 1.2, 1] : 1,
@@ -725,12 +818,19 @@ export default function Dashboard() {
 
               {/* Model Badge */}
               <div className="px-3 py-1.5 rounded-full bg-[var(--bg-surface)] text-xs font-mono">
-                Model: <span className="text-[var(--cyber-purple)]">{selectedModel}</span>
+                Model:{" "}
+                <span className="text-[var(--cyber-purple)]">
+                  {selectedModel}
+                </span>
               </div>
 
               {/* Iteration Counter */}
               <div className="px-3 py-1.5 rounded-full bg-[var(--bg-surface)] text-xs font-mono">
-                Iter: <span className="text-[var(--cyber-cyan)]">{currentIteration}</span>/{sessionConfig.maxIterations}
+                Iter:{" "}
+                <span className="text-[var(--cyber-cyan)]">
+                  {currentIteration}
+                </span>
+                /{sessionConfig.maxIterations}
               </div>
 
               {/* Tour Trigger */}
@@ -764,7 +864,7 @@ export default function Dashboard() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 lg:hidden"
           >
-            <div 
+            <div
               className="absolute inset-0 bg-black/50"
               onClick={() => setMobileMenuOpen(false)}
             />
@@ -781,7 +881,7 @@ export default function Dashboard() {
                 </span>
               </div>
               <nav className="p-2 space-y-1">
-                {navItems.map((item) => {
+                {navItems.map(item => {
                   const isActive = activeSection === item.id;
                   return (
                     <button

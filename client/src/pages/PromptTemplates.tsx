@@ -14,9 +14,7 @@ import {
   Upload,
   Sparkles,
   X,
-  Check,
   BookOpen,
-  Zap,
   Library
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -322,7 +320,7 @@ export default function PromptTemplates() {
           });
         }
         toast.success(`Imported ${templates.length} templates!`);
-      } catch (error) {
+      } catch (_err) {
         toast.error("Failed to import templates");
       }
     };

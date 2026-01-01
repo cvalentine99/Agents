@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
@@ -57,7 +56,7 @@ export function PromptMdEditor({ projectPath, onPromptChange, lastError }: Promp
   );
 
   // Get default template
-  const { data: defaultTemplate } = trpc.promptMd.getDefaultTemplate.useQuery();
+  const { data: _defaultTemplate } = trpc.promptMd.getDefaultTemplate.useQuery();
 
   // Detect failure pattern when lastError changes
   const { data: suggestedPattern } = trpc.promptMd.detectFailurePattern.useQuery(

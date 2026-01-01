@@ -84,7 +84,7 @@ export function SessionTemplateCard({
 }: SessionTemplateCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const formatDate = (date: Date | null) => {
+  const _formatDate = (date: Date | null) => {
     if (!date) return "Never";
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",

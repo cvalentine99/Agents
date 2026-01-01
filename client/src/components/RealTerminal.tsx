@@ -183,7 +183,7 @@ export function RealTerminal({
   }, [sessionId, userId, workingDirectory, onOutput, onExit]);
 
   // Execute command programmatically
-  const executeCommand = useCallback((command: string) => {
+  const _executeCommand = useCallback((command: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: 'input', data: command + '\n' }));
     }

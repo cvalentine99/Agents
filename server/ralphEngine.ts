@@ -5,7 +5,7 @@
 
 import { EventEmitter } from 'events';
 import { ptyService } from './ptyService';
-import { callLLM, generateCode, reviewCode, analyzeTestResults, LLMModel } from './llmExecutor';
+import { generateCode, LLMModel } from './llmExecutor';
 import * as promptMdService from './promptMd';
 import * as autoSign from './autoSignSuggestions';
 import * as fs from 'fs';
@@ -75,7 +75,7 @@ class RalphEngine extends EventEmitter {
     this.outputBuffers.set(config.sessionId, '');
 
     // Create PTY session for command execution
-    const ptySession = ptyService.createSession(config.sessionId, config.userId, config.workingDir);
+    const _ptySession = ptyService.createSession(config.sessionId, config.userId, config.workingDir);
     
     // Listen to PTY output
     ptyService.on('output', (sessionId: string, data: string) => {
@@ -194,8 +194,8 @@ class RalphEngine extends EventEmitter {
 
         this.emit('stateChange', sessionId, state);
 
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      } catch (_error) {
+        const errorMsg = _error instanceof Error ? _error.message : 'Unknown error';
         state.errors.push(errorMsg);
         this.emit('log', sessionId, `❌ Error in iteration: ${errorMsg}`);
         state.noProgressCount++;
@@ -250,7 +250,7 @@ class RalphEngine extends EventEmitter {
         const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
         projectState += `Package.json scripts: ${JSON.stringify(pkg.scripts || {})}\n`;
       }
-    } catch (error) {
+    } catch (_err) {
       projectState = 'Could not analyze project state';
     }
 
@@ -284,11 +284,11 @@ class RalphEngine extends EventEmitter {
             // Also write it to the project directory for reference
             fs.writeFileSync(promptMdPath, promptMdContent);
           }
-        } catch (e) {
+        } catch (__e) {
           // Database not available, use fallback
         }
       }
-    } catch (error) {
+    } catch (_error) {
       this.emit('log', sessionId, '⚠️ Could not read PROMPT.md, using default prompt');
     }
 

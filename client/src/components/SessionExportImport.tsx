@@ -5,13 +5,11 @@ import {
   Upload,
   FileJson,
   Check,
-  X,
   AlertTriangle,
   Copy,
   Share2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -168,7 +166,7 @@ export function SessionExportImport({
         setImportDialogOpen(false);
         setImportSuccess(false);
       }, 1500);
-    } catch (e) {
+    } catch (__e) {
       setImportError("Invalid JSON. Please check the format and try again.");
     }
   };
