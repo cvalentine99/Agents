@@ -75,8 +75,8 @@ export async function listDirectory(targetPath: string, directoriesOnly: boolean
     if (!stats.isDirectory()) {
       throw new Error(`Path "${sanitizedPath}" is not a directory`);
     }
-  } catch (error: any) {
-    if (error.code === 'ENOENT') {
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
       throw new Error(`Directory not found: "${sanitizedPath}"`);
     }
     throw error;

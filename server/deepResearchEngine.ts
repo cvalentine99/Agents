@@ -133,7 +133,7 @@ async function performSearch(query: string): Promise<ResearchSource[]> {
     const rawContent = response.choices[0].message.content;
     const contentStr = typeof rawContent === 'string' ? rawContent : '{"results":[]}';
     const parsed = JSON.parse(contentStr);
-    return (parsed.results || []).map((r: any, idx: number) => ({
+    return (parsed.results || []).map((r: { url: string; title: string; snippet: string }, idx: number) => ({
       url: r.url,
       title: r.title,
       snippet: r.snippet,
@@ -226,7 +226,7 @@ async function synthesizeFindings(
     const parsed = JSON.parse(contentStr);
     return {
       summary: parsed.summary || 'No summary available.',
-      findings: (parsed.findings || []).map((f: any) => ({
+      findings: (parsed.findings || []).map((f: { title: string; content: string; sourceIndices?: number[]; confidence?: string; category?: string }) => ({
         title: f.title,
         content: f.content,
         sources: (f.sourceIndices || []).map((i: number) => sources[i]?.url || ''),
@@ -349,11 +349,12 @@ export async function executeResearch(
       executionTimeMs: Date.now() - startTime
     };
 
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     onProgress?.({
       stage: 'error',
       progress: 0,
-      message: `Error: ${error.message}`
+      message: `Error: ${errorMessage}`
     });
 
     throw error;

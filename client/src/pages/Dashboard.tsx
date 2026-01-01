@@ -279,9 +279,8 @@ export default function Dashboard() {
         return (
           <PowerPromptor
             selectedModel={selectedModel}
-            onGeneratePrompt={(prompt, promise) => {
-              console.log("Generated prompt:", prompt);
-              console.log("Completion promise:", promise);
+            onGeneratePrompt={(_prompt, _promise) => {
+              // Prompt generated - handled by PowerPromptor component
             }}
           />
         );
@@ -304,7 +303,9 @@ export default function Dashboard() {
             stuckIndicators={[]}
             lastStateChange={new Date()}
             onReset={() => setCircuitBreakerState("CLOSED")}
-            onAskHuman={() => console.log("Asking human...")}
+            onAskHuman={() => {
+              // TODO: Implement human intervention request
+            }}
           />
         );
       
@@ -324,8 +325,12 @@ export default function Dashboard() {
             files={diffFiles}
             onApproveHunk={handleApproveHunk}
             onDenyHunk={handleDenyHunk}
-            onApplyApproved={() => console.log("Applying approved hunks...")}
-            onRollback={() => console.log("Rolling back...")}
+            onApplyApproved={() => {
+              // TODO: Implement applying approved hunks
+            }}
+            onRollback={() => {
+              // TODO: Implement rollback functionality
+            }}
             onToggleFile={handleToggleFile}
             hasCheckpoint={true}
           />
