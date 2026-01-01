@@ -22,6 +22,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { SessionTemplate } from "@/lib/apiTypes";
 import { toast } from "sonner";
 import { SessionTemplateCard } from "@/components/SessionTemplateCard";
 import { SaveAsTemplateModal } from "@/components/SaveAsTemplateModal";
@@ -110,7 +111,7 @@ export default function SessionTemplatesPage() {
     useTemplate.mutate({ id: template.id });
   };
 
-  const handleEdit = (template: any) => {
+  const handleEdit = (_template: any) => {
     // For now, just show a toast - could open an edit modal
     toast.info("Edit functionality coming soon!");
   };
@@ -119,7 +120,7 @@ export default function SessionTemplatesPage() {
     deleteTemplate.mutate({ id });
   };
 
-  const handleDuplicate = (template: any) => {
+  const handleDuplicate = (_template: any) => {
     // Open create modal with pre-filled data
     toast.info("Duplicate functionality coming soon!");
   };
