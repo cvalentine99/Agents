@@ -98,6 +98,8 @@
   },
   "devDependencies": {
     "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
+    "@commitlint/cli": "^20.3.0",
+    "@commitlint/config-conventional": "^20.3.0",
     "@eslint/js": "^9.39.2",
     "@stryker-mutator/core": "^9.4.0",
     "@stryker-mutator/typescript-checker": "^9.4.0",

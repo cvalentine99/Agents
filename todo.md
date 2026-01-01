@@ -1,29 +1,34 @@
 # Coding Wheel - RALPH Loop+ Command Center
 
 ## Core UI & Theme
+
 - [x] Cyberpunk purple/neon design system (CSS variables, fonts, animations)
 - [x] Dark theme with neon accents (purple, cyan, magenta)
 - [x] Responsive layout for desktop and mobile
 
 ## Feature 1: Circular Spinning Wheel
+
 - [x] Model selection wheel (Codex, Claude, Gemini, Manus)
 - [x] Smooth spin animation with easing
 - [x] Neon glow effects on selection
 - [x] Click-to-spin and manual selection modes
 
 ## Feature 2: RALPH Loop+ Flight Computer
+
 - [x] Completion promise progress meter (0-100%)
 - [x] Circuit breaker status display (CLOSED/HALF_OPEN/OPEN)
 - [x] Iteration counter with history
 - [x] Real-time telemetry panel
 
 ## Feature 3: Power Promptor
+
 - [x] Dyslexia-friendly interface with large text
 - [x] 4-field form (Goal/Context/Done when/Do not)
 - [x] Auto-expansion to model-optimized prompts
 - [x] Voice-to-spec input (Web Speech API)
 
 ## Feature 4: Agent Profile System
+
 - [x] Patch Goblin mode (fast diffs, minimal prose)
 - [x] Architect Owl mode (design/tradeoffs, no code)
 - [x] Test Gremlin mode (test-first approach)
@@ -31,12 +36,14 @@
 - [x] Profile selector with descriptions
 
 ## Feature 5: Session Management
+
 - [x] RALPH Mode toggle (Manual vs Autonomous Loop)
 - [x] Completion promise editor with checkbox tracking
 - [x] Stop hook enforcement visualization
 - [x] Session history and state persistence
 
 ## Feature 6: Multi-Agent Assembly Line
+
 - [x] Spec Agent stage
 - [x] Implementer stage
 - [x] Reviewer stage
@@ -44,12 +51,14 @@
 - [x] Swap-model capability per stage
 
 ## Feature 7: Circuit Breaker Visualization
+
 - [x] State transition diagram (CLOSED → OPEN → HALF_OPEN)
 - [x] No-progress counter display
 - [x] Stuck detection indicators
 - [x] One-click reset button
 
 ## Feature 8: Live Monitoring Dashboard
+
 - [x] Diff changes visualization
 - [x] Test status panel
 - [x] Files modified list
@@ -57,12 +66,14 @@
 - [x] Loop health metrics
 
 ## Feature 9: Diff-First UX
+
 - [x] Patch preview panel
 - [x] Hunk-level approval/denial
 - [x] One-click rollback to checkpoint
 - [x] Safe apply workflow
 
 ## Feature 10: Known-Good Prompt Packs
+
 - [x] React + Tailwind + Vite pack
 - [x] FastAPI + Pydantic + pytest pack
 - [x] Rust + Axum + Tokio pack
@@ -70,6 +81,7 @@
 - [x] Stack detection and suggestion
 
 ## Database & Backend
+
 - [x] Sessions table schema
 - [x] Prompts table schema
 - [x] Completion promises table
@@ -79,6 +91,7 @@
 ## Phase 2 Features
 
 ### API Key Configuration
+
 - [x] Create Settings page with API key management
 - [x] Add secure storage for API keys (encrypted in database)
 - [x] Support Codex, Claude, Gemini, Manus API keys
@@ -86,6 +99,7 @@
 - [x] Show masked keys with reveal toggle
 
 ### Real CLI Execution
+
 - [x] Create WebSocket endpoint for streaming CLI output
 - [x] Implement process spawning for claude CLI
 - [x] Stream stdout/stderr to frontend in real-time
@@ -93,6 +107,7 @@
 - [x] Support --dangerously-skip-permissions flag
 
 ### Session Persistence
+
 - [x] Wire Start Loop button to create database session
 - [x] Track iteration history in real-time
 - [x] Update completion progress from CLI output
@@ -102,6 +117,7 @@
 ## Phase 3 Features
 
 ### Session History Page
+
 - [x] Create SessionHistory page component
 - [x] Display list of past sessions with status badges
 - [x] Show iteration counts and completion progress
@@ -110,6 +126,7 @@
 - [x] Filter sessions by status (all/running/paused/complete/failed)
 
 ### CliTerminal Dashboard Integration
+
 - [x] Add collapsible terminal panel to Flight Computer
 - [x] Connect terminal to active session WebSocket
 - [x] Show/hide toggle with keyboard shortcut (Ctrl+`)
@@ -117,6 +134,7 @@
 - [x] Terminal fullscreen mode
 
 ### Working Directory Picker
+
 - [x] Create DirectoryPicker component
 - [x] Recent projects list (stored in localStorage)
 - [x] Manual path input with validation
@@ -126,6 +144,7 @@
 ## Phase 4 Features
 
 ### Real-time WebSocket CLI Streaming
+
 - [x] Create WebSocket server endpoint for CLI streaming
 - [x] Spawn actual CLI processes (claude --dangerously-skip-permissions)
 - [x] Stream stdout/stderr to connected clients in real-time
@@ -134,6 +153,7 @@
 - [x] Add reconnection logic for dropped connections
 
 ### Completion Criteria Editor
+
 - [x] Create CompletionCriteriaEditor component
 - [x] Add/edit/delete completion promise items
 - [x] Checkbox tracking for each criterion
@@ -142,6 +162,7 @@
 - [x] Integrate editor into Flight Computer view
 
 ### Session Export/Import
+
 - [x] Create export functionality (download session config as JSON)
 - [x] Create import functionality (upload JSON to create new session)
 - [x] Include all session settings, criteria, and prompt data
@@ -149,10 +170,10 @@
 - [x] Validate imported JSON schema before creating session
 - [x] Support sharing RALPH configurations between projects
 
-
 ## Phase 5 Features
 
 ### Claude CLI Integration
+
 - [x] Wire "Start Loop" button to spawn actual claude CLI process
 - [x] Use `claude --dangerously-skip-permissions` flag
 - [x] Pass prompt from Power Promptor to CLI
@@ -162,6 +183,7 @@
 - [x] Update session status based on CLI exit codes
 
 ### Session Analytics Dashboard
+
 - [x] Create Analytics page component
 - [x] Chart: Iteration trends over time (line chart)
 - [x] Chart: Success rate by model (bar chart)
@@ -170,7 +192,9 @@
 - [x] Summary stats: Total sessions, avg iterations, success rate
 - [x] Filter by date range and model type
 - [x] Add link to Analytics in sidebar
+
 ### Prompt Template Library
+
 - [x] Create PromptTemplates page component
 - [x] Save Power Promptor configs as reusable templates
 - [x] Add tags to templates for categorization
@@ -180,10 +204,10 @@
 - [x] Pre-built starter templates for common tasks
 - [x] Add link to Templates in sidebar
 
-
 ## Phase 6 Features
 
 ### Enhanced Prompt Library (50 Single-Line Prompts + awesome-gemini-ai)
+
 - [x] Add 50 single-line prompts organized by 5 categories
 - [x] Add Pro Tips section with advanced techniques
 - [x] Add awesome-gemini-ai prompts (Web Dev, UI/UX, Creative, n8n)
@@ -192,6 +216,7 @@
 - [x] Context stacking helper for large context
 
 ### Browser Notification System
+
 - [x] Request notification permissions on first use
 - [x] Push notification when loop completes successfully
 - [x] Push notification when loop fails
@@ -202,6 +227,7 @@
 - [x] Desktop notification with action buttons (View, Dismiss)
 
 ### Multi-Session Split-Pane View
+
 - [x] Create MultiSessionView page component
 - [x] Resizable split-pane layout (2, 3, or 4+ sessions)
 - [x] Mini Flight Computer widget for each pane
@@ -211,6 +237,7 @@
 - [x] Add route and sidebar link
 
 ### Ultrawide 5120x1440 Optimization
+
 - [x] Responsive breakpoints for ultrawide displays (2560px, 3840px, 5000px)
 - [x] 4-6 column layout options for multi-session view
 - [x] Larger font sizes for readability on big screens
@@ -219,10 +246,10 @@
 - [x] Dashboard grid optimization for wide screens
 - [x] Animation performance optimization for large displays
 
-
 ## Phase 7 Features
 
 ### Session Templates (Reusable Session Configurations)
+
 - [x] Create sessionTemplates database table
 - [x] Add tRPC procedures for CRUD operations on session templates
 - [x] Create SessionTemplateCard component for displaying templates
@@ -237,10 +264,10 @@
 - [x] Add template search and filter by tags
 - [x] Add route and sidebar link to Session Templates page
 
-
 ## Phase 8 Features
 
 ### Guided Onboarding Tour
+
 - [x] Create OnboardingTour component with step-by-step guidance
 - [x] Create TourStep component for individual tour steps
 - [x] Create TourOverlay component for highlighting elements
@@ -257,10 +284,10 @@
 - [x] Animate spotlight/highlight on active elements
 - [x] Add progress indicator showing current step
 
-
 ## Rebranding
 
 ### Name Change to "Agents by Valentine RF"
+
 - [x] Update app title in index.html
 - [x] Update header/logo text in Home.tsx
 - [x] Update header/logo text in Dashboard.tsx
@@ -268,18 +295,20 @@
 - [x] Update any other branding references (TourTrigger, OnboardingContext, Settings)
 
 ### Tagline Update
+
 - [x] Update tagline to "Your AI-powered software development partner."
 
 ### Multi-Agent Workflow Section
+
 - [x] Create new section explaining multi-agent workflow orchestration
 - [x] Include visual diagram or illustration of the workflow
 - [x] Explain the 4 AI models (Codex, Claude, Gemini, Manus)
 - [x] Describe the RALPH Loop+ system and how it works
 
-
 ## Code Review Findings (Senior Review - Dec 31, 2025)
 
 ### 🚨 Critical Security Issues
+
 - [x] Fix IDOR vulnerability in sessions.get endpoint (add ownership check)
 - [x] Fix IDOR vulnerability in sessions.update endpoint (add ownership check)
 - [x] Fix IDOR vulnerability in sessions.delete endpoint (add ownership check)
@@ -288,6 +317,7 @@
 - [x] Replace static salt in crypto.ts with per-encryption random salt
 
 ### ⚠️ High Priority
+
 - [x] Add database indexes on sessions.userId, sessions.status
 - [x] Add database indexes on completionCriteria.sessionId
 - [x] Configure QueryClient with retry, staleTime, gcTime options
@@ -295,21 +325,23 @@
 - [x] Add rate limiting to API endpoints
 
 ### 🟡 Medium Priority
+
 - [ ] Cap metrics array growth in Dashboard useEffect
 - [ ] Standardize database error handling patterns
 - [ ] Implement route-based code splitting
 - [ ] Remove type assertions and `any` usage
 
 ### 🟢 Low Priority
+
 - [x] Add request logging with morgan
 - [ ] Add environment variable validation with Zod
 - [ ] Add frontend component tests
 - [ ] Add E2E tests with Playwright
 
-
 ## Deep Research Feature
 
 ### Database & Backend
+
 - [x] Create research_sessions table schema
 - [x] Create research_findings table for storing results
 - [x] Add tRPC routes for research CRUD operations
@@ -317,6 +349,7 @@
 - [ ] Add streaming support for real-time research updates
 
 ### Frontend UI
+
 - [x] Create DeepResearch page component
 - [x] Build research input form with topic/question field
 - [x] Create research results display with sources and citations
@@ -325,31 +358,34 @@
 - [ ] Add export functionality for research results
 
 ### Integration
+
 - [x] Add Deep Research to dashboard navigation
 - [x] Add route in App.tsx
 - [x] Add unit tests for research feature (15 tests)
 
-
 ### Export Functionality
+
 - [x] Add Markdown export for research results
 - [ ] Add PDF export for research results (deferred - markdown covers most use cases)
 - [x] Add export buttons to research detail view
 
 ### Research Sharing
+
 - [x] Add shareToken field to research_sessions table
 - [x] Create public research view route
 - [x] Add share button and copy link functionality
 - [x] Create public research page component
 
 ### Follow-up Questions
+
 - [x] Add follow_up_questions table to schema
 - [x] Create API routes for follow-up questions
 - [x] Add follow-up question input UI
 - [x] Display follow-up Q&A in research view
 - [x] Add 14 unit tests for new features
 
-
 ### PDF Export Enhancement
+
 - [x] Install PDF generation library (puppeteer)
 - [x] Create PDF export API endpoint
 - [x] Design cover page with research title, date, and branding
@@ -359,8 +395,8 @@
 - [x] Test PDF generation with various research content
 - [x] Add 9 unit tests for PDF generation
 
-
 ### Research Templates
+
 - [x] Create research template data structure with categories
 - [x] Add NVIDIA DGX SPARK templates (specs, pricing, use cases)
 - [x] Add x86 4090 NVIDIA pipeline templates (setup, optimization, benchmarks)
@@ -371,8 +407,8 @@
 - [x] Add template icons and descriptions
 - [x] Add 24 unit tests for templates
 
-
 ### Custom Template Creation
+
 - [x] Create custom_templates table in database schema
 - [x] Add API routes for CRUD operations on custom templates
 - [x] Add "Save as Template" button in research UI
@@ -380,6 +416,7 @@
 - [x] Display custom templates in template browser
 
 ### Template Favorites
+
 - [x] Create template_favorites table in database schema
 - [x] Add API routes for favoriting/unfavoriting templates
 - [x] Add star/favorite button to template cards
@@ -387,14 +424,15 @@
 - [x] Show favorite count on templates
 
 ### Template Usage Analytics
+
 - [x] Create template_usage table in database schema
 - [x] Track template usage when research is started
 - [x] Add API route to get usage statistics
 - [x] Display "Popular" badge on frequently used templates
 - [x] Add usage count to template cards
 
-
 ### Custom Template Categories
+
 - [x] Add user_template_categories table to database schema
 - [x] Add categoryId foreign key to custom_templates table
 - [x] Create tRPC routes for category CRUD operations
@@ -403,6 +441,7 @@
 - [x] Filter custom templates by category in template browser
 
 ### Template Import/Export
+
 - [x] Create export endpoint to generate JSON from custom templates
 - [x] Create import endpoint to parse and create templates from JSON
 - [x] Add "Export All" button to download all custom templates
@@ -411,19 +450,19 @@
 - [x] Validate imported JSON schema before creating templates
 - [x] Handle duplicate template names during import
 
-
 ## Workflow Documentation for Analyst
 
 ### Documentation Tasks
+
 - [x] Create WORKFLOW_DOCUMENTATION.md with all process flows
 - [x] Create SYSTEM_LAYOUT.md with component architecture
 - [x] Create TOPOLOGY_DIAGRAMS.md with Mermaid diagrams
 - [x] Mermaid diagrams included in markdown (can be rendered to PNG)
 
-
 ## AI RAG System Feature
 
 ### Database & Schema
+
 - [x] Create rag_documents table for storing document chunks
 - [x] Create rag_chunks table for chunked content with embeddings
 - [x] Create rag_conversations table for chat history
@@ -432,6 +471,7 @@
 - [x] Add vector similarity search support (cosine similarity)
 
 ### Backend Services
+
 - [x] Create RAG service with document chunking logic (500 char chunks, 50 char overlap)
 - [x] Implement text embedding generation using LLM API
 - [x] Build semantic search with cosine similarity ranking
@@ -439,6 +479,7 @@
 - [x] Build context-aware response generation with source citations
 
 ### tRPC Procedures
+
 - [x] Create rag.ingestDocument procedure
 - [x] Create rag.search procedure for semantic search
 - [x] Create rag.chat procedure for conversational RAG
@@ -453,6 +494,7 @@
 - [x] Create rag.ingestSystemDocs procedure
 
 ### Frontend UI
+
 - [x] Create Knowledge Base page with chat interface
 - [x] Build document upload/management panel
 - [x] Add source citation display in responses (expandable sources)
@@ -461,18 +503,20 @@
 - [x] Add navigation link in Dashboard sidebar
 
 ### Documentation Ingestion
+
 - [x] Create 10 comprehensive system documentation articles
 - [x] Add "Load System Docs" button for one-click ingestion
 - [x] Include RALPH Loop, Deep Research, Architecture, Security, etc.
 
 ### Testing
+
 - [x] Write 15 unit tests for RAG service (rag.test.ts)
 - [x] All 145 tests passing
-
 
 ## RAG Knowledge Base Enhancements
 
 ### File Upload Support
+
 - [x] Create file upload endpoint for RAG documents (rag.uploadFile)
 - [x] Add PDF text extraction using pdf-parse
 - [x] Add Markdown file parsing
@@ -481,22 +525,24 @@
 - [x] Show upload progress and status with file icons
 
 ### Streaming Responses
+
 - [x] Create streaming chat endpoint using Server-Sent Events (/api/rag/stream)
 - [x] Update RAG chat to stream LLM responses (word-by-word)
 - [x] Update frontend to handle streaming responses (EventSource)
 - [x] Show typing indicator and streaming badge during generation
 
 ### Conversation Search
+
 - [x] Add search endpoint for conversations and messages (rag.searchConversations)
 - [x] Create search function with LIKE query on message content
 - [x] Add search UI tab in Knowledge Base
 - [x] Display matched messages with context and timestamps
 - [x] Navigate to conversation from search results
 
-
 ## Floating RAG Chat Widget
 
 ### Widget Component
+
 - [x] Create RagChatWidget component with collapsed/expanded states
 - [x] Add floating button in lower right corner with Brain icon
 - [x] Create expandable chat panel with conversation interface
@@ -504,21 +550,23 @@
 - [x] Persist widget state (open/closed) in localStorage
 
 ### Chat Functionality
+
 - [x] Connect to existing RAG tRPC procedures
 - [x] Support streaming responses in widget (SSE)
 - [x] Show source citations in compact format
 - [x] Add conversation history dropdown with new chat button
 
 ### Integration
+
 - [x] Add widget to App.tsx layout (visible on all pages)
 - [x] Ensure widget doesn't interfere with page content (fixed positioning)
 - [x] Add smooth open/close animations (transition-all)
 - [x] Make widget responsive (expandable to 600px width)
 
-
 ## Custom Agent Profiles
 
 ### Database Schema
+
 - [x] Create custom_agent_profiles table with name, description, system prompt, settings
 - [x] Add userId foreign key for ownership
 - [x] Add icon and color fields for visual customization
@@ -526,6 +574,7 @@
 - [x] Add usage tracking fields (usageCount, lastUsedAt)
 
 ### Backend API
+
 - [x] Create agentProfiles.create procedure
 - [x] Create agentProfiles.list procedure (include built-in + custom)
 - [x] Create agentProfiles.get procedure
@@ -535,6 +584,7 @@
 - [x] Create agentProfiles.trackUsage procedure
 
 ### Frontend UI
+
 - [x] Add "Create Profile" button to Agent Profiles section
 - [x] Create profile editor modal/form with icon/color pickers
 - [x] Add system prompt textarea with guidance
@@ -544,10 +594,10 @@
 - [x] Show custom profiles alongside built-in profiles
 - [x] Update schema to support custom profile IDs in sessions
 
-
 ## Agent Profile Template Gallery
 
 ### Template Data
+
 - [x] Create agentProfileTemplates.ts with pre-made profile templates (16 templates)
 - [x] Add Documentation Writer template
 - [x] Add JSDoc Master template
@@ -568,11 +618,13 @@
 - [x] Organize templates by 7 categories
 
 ### Backend API
+
 - [x] Create agentProfiles.listTemplates procedure (with category/search filters)
 - [x] Create agentProfiles.getTemplate procedure
 - [x] Create agentProfiles.importTemplate procedure
 
 ### Frontend UI
+
 - [x] Create ProfileTemplateGallery component
 - [x] Add category tabs/filters (8 tabs including All)
 - [x] Add template preview cards with details
@@ -582,54 +634,60 @@
 - [x] Add "Templates" button to AgentProfiles header
 - [x] Integrate gallery modal into AgentProfiles component
 
-
 ## PROMPT.md System (Core Ralph Loop Feature)
 
 ### Database Schema
+
 - [ ] Create project_prompts table for storing PROMPT.md content per project
 - [ ] Add version history for prompt changes
 - [ ] Link prompts to sessions for tracking which prompt was used
 
 ### Backend API
+
 - [ ] Create prompts.get procedure to fetch current PROMPT.md
 - [ ] Create prompts.save procedure to update PROMPT.md
 - [ ] Create prompts.getHistory procedure for version history
 - [ ] Create prompts.addSign procedure to append guidance after failures
 
 ### RALPH Engine Integration
+
 - [ ] Modify ralphEngine.ts to read PROMPT.md before each iteration
 - [ ] Pipe PROMPT.md content to LLM as system context
 - [ ] Log which version of PROMPT.md was used per iteration
 
 ### Failure Detection & Sign Suggestions
+
 - [ ] Detect failure patterns (same error repeated, test failures)
 - [ ] Generate suggested "signs" based on failure type
 - [ ] Prompt user to add signs when failures occur
 - [ ] Auto-suggest common fixes for known error patterns
 
 ### Frontend UI
+
 - [ ] Create PromptEditor component with markdown support
 - [ ] Add PROMPT.md tab to Flight Computer
 - [ ] Show prompt version history sidebar
 - [ ] Add "Add Sign" quick action button
 - [ ] Show failure suggestions inline
 
-
 ## Auto-Sign Suggestions for Repeated Failures
 
 ### Failure Pattern Tracking
+
 - [ ] Track consecutive failures with same error pattern
 - [ ] Store failure history per session with timestamps
 - [ ] Detect when same error occurs 2+ times in a row
 - [ ] Calculate failure frequency and severity
 
 ### Auto-Suggestion Engine
+
 - [ ] Expand FAILURE_SIGNS with more specific patterns
 - [ ] Create context-aware sign suggestions based on error content
 - [ ] Prioritize suggestions by relevance to current error
 - [ ] Generate custom signs using LLM when no pattern matches
 
 ### UI Components
+
 - [ ] Add auto-suggestion banner in PROMPT.md editor
 - [ ] Show suggested signs with one-click "Add" button
 - [ ] Add "Dismiss" option to hide irrelevant suggestions
@@ -637,15 +695,16 @@
 - [ ] Animate new suggestions to draw attention
 
 ### Integration
+
 - [ ] Connect RALPH engine to suggestion system
 - [ ] Emit events when failures are detected
 - [ ] Auto-refresh suggestions when new errors occur
 - [ ] Persist dismissed suggestions to avoid re-showing
 
-
 ## Working Directory Picker (File Browser)
 
 ### Backend
+
 - [ ] Create file system browsing tRPC endpoint
 - [ ] List directories with metadata (name, path, isDirectory)
 - [ ] Support navigation up/down directory tree
@@ -653,6 +712,7 @@
 - [ ] Add security checks for path traversal
 
 ### Frontend
+
 - [ ] Create DirectoryPicker component with file browser UI
 - [ ] Add breadcrumb navigation for current path
 - [ ] Add folder icons and selection highlighting
@@ -662,6 +722,7 @@
 ## Deep Research Execution Engine
 
 ### Backend Services
+
 - [ ] Create web scraping service with fetch/cheerio
 - [ ] Implement search query execution via search API
 - [ ] Build content extraction from URLs
@@ -670,20 +731,22 @@
 - [ ] Add rate limiting and retry logic
 
 ### tRPC Procedures
+
 - [ ] Create research.executeResearch procedure (real execution)
 - [ ] Create research.streamProgress procedure
 - [ ] Wire existing UI to real execution backend
 
 ### Frontend Integration
+
 - [ ] Connect Deep Research UI to real execution backend
 - [ ] Show real-time progress updates during scraping
 - [ ] Display extracted content and sources
 - [ ] Update progress bar with actual scraping status
 
-
 ## API Contracts & Validation
 
 ### Contract Documentation
+
 - [ ] Audit all 15+ tRPC routers and extract procedure signatures
 - [ ] Document input schemas (Zod) for each procedure
 - [ ] Document output types for each procedure
@@ -691,19 +754,21 @@
 - [ ] Add examples for each endpoint
 
 ### Contract Validation
+
 - [ ] Create contract validation test suite
 - [ ] Test input validation for all procedures
 - [ ] Test output type conformance
 - [ ] Add runtime validation helpers
 
 ### Frontend Integration
+
 - [ ] Export typed API client from shared module
 - [ ] Create type-safe hooks for common operations
 - [ ] Add request/response interceptors for validation
 - [ ] Document frontend usage patterns
 
-
 ## API Contracts & Validation
+
 - [x] Create comprehensive API contracts documentation (docs/API_CONTRACTS.md)
 - [x] Document all 19 tRPC routers with 117 procedures
 - [x] Define input/output schemas with Zod validation
@@ -713,8 +778,8 @@
 - [x] Document WebSocket endpoints (CLI, PTY, RALPH, RAG streaming)
 - [x] Document error handling and rate limiting
 
-
 ## Test Coverage Analysis
+
 - [x] Analyze all 19 test files (273 tests total)
 - [x] Identify critical coverage gaps (RALPH Engine, PTY Service, LLM Executor)
 - [x] Create comprehensive TEST_COVERAGE_ANALYSIS.md report
@@ -726,12 +791,14 @@
 - [ ] Expand auth.logout.test.ts to cover all auth scenarios
 
 ## Integration Tests & CI/CD
+
 - [x] Create RALPH Loop integration tests (22 tests - end-to-end session simulation)
 - [x] Create Deep Research Engine tests (38 tests - 400+ lines coverage)
 - [x] Set up GitHub Actions CI/CD pipeline (.github/workflows/ci.yml)
 - [x] Verify all tests pass (502 tests across 25 files)
 
 ## Codecov Integration
+
 - [x] Configure Vitest for coverage reporting (@vitest/coverage-v8)
 - [x] Update GitHub Actions workflow for Codecov upload
 - [x] Create codecov.yml configuration file
@@ -739,6 +806,7 @@
 - [x] Add coverage badges to README
 
 ## Stryker Mutation Testing
+
 - [x] Install Stryker dependencies (@stryker-mutator/core, vitest-runner)
 - [x] Create stryker.config.json configuration file
 - [x] Add mutation testing scripts to package.json (test:mutation, test:mutation:incremental)
@@ -746,12 +814,14 @@
 - [x] Document mutation testing workflow
 
 ## Mutation Testing Improvements
+
 - [x] Fix 8 surviving mutants in crypto.ts (added 6 new tests for encoding verification)
 - [x] Add Stryker mutation testing to GitHub Actions CI (with PR comments)
 - [x] Run mutation tests on autoSignSuggestions.ts (timeout due to large file)
 - [x] Analyze mutation results for critical modules (crypto.ts: 86.15% score)
 
 ## Kill Remaining Mutants
+
 - [x] Kill StringLiteral mutants - improved from 8 to 5 surviving (added 8 new tests)
 - [x] Kill ArithmeticOperator mutants - 3 killed with boundary tests
 - [x] LogicalOperator mutant - requires env var mocking (skipped)
@@ -759,6 +829,7 @@
 - [x] Mutation score improved from 86.15% to 90.77%
 
 ## Serena & Sentry Cleanup
+
 - [x] Set up Serena for semantic code analysis
 - [x] Onboard project to Serena (created memory files)
 - [x] Analyze code structure and identify issues
@@ -769,6 +840,7 @@
   - [x] Fixed 4 any types with proper TypeScript types (fileBrowser.ts, deepResearchEngine.ts)
 
 ## Security & Linting Improvements
+
 - [x] Authenticate Sentry for error monitoring (connected to valentine-rf org)
 - [x] Fix GitHub Dependabot security vulnerabilities (all 7 fixed via pnpm overrides)
   - Fixed: qs DoS (high), tRPC prototype pollution (high)
@@ -777,8 +849,15 @@
 - [x] Verify all tests pass after security updates (516 tests passing)
 
 ## Pre-commit Hooks
+
 - [x] Install Husky and lint-staged (husky 9.1.7, lint-staged 16.2.7)
 - [x] Configure pre-commit hook to run lint-staged (eslint --fix, prettier --write)
 - [x] Configure pre-commit hook to run tests (pnpm test)
 - [x] Test pre-commit hook functionality (verified working)
 - [x] Fixed duplicate imports in db.ts (consolidated at top)
+
+## Conventional Commits
+- [x] Install commitlint and conventional config (@commitlint/cli 20.3.0)
+- [x] Configure commitlint rules (commitlint.config.js)
+- [x] Create commit-msg hook with Husky (.husky/commit-msg)
+- [x] Test conventional commit enforcement (verified working)
