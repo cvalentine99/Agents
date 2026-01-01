@@ -241,7 +241,7 @@ async function startServer() {
         const data = JSON.parse(message.toString());
         
         switch (data.type) {
-          case "create":
+          case "create": {
             // Create new PTY session
             sessionId = data.sessionId || `pty-${Date.now()}`;
             const cwd = data.cwd || "/home/ubuntu";
@@ -268,6 +268,7 @@ async function startServer() {
             
             ws.send(JSON.stringify({ type: "created", sessionId, cwd, timestamp: Date.now() }));
             break;
+          }
             
           case "input":
             // Send input to PTY

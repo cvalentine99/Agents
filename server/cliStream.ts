@@ -61,7 +61,7 @@ function buildCommand(params: StartLoopParams, apiKey: string): { command: strin
   const baseEnv: Record<string, string> = {};
   
   switch (model) {
-    case "claude":
+    case "claude": {
       const claudeArgs: string[] = [];
       
       // Add dangerous skip permissions first if enabled
@@ -81,6 +81,7 @@ function buildCommand(params: StartLoopParams, apiKey: string): { command: strin
       }
       
       return { command: "claude", args: claudeArgs, env: baseEnv };
+    }
       
     case "codex":
       // OpenAI Codex CLI

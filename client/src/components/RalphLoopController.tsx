@@ -17,7 +17,9 @@ import {
   Gauge,
   Clock,
   FileCode,
-  Zap
+  Zap,
+  FileText,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -28,7 +30,6 @@ import { trpc } from "@/lib/trpc";
 import { PromptMdEditor } from "@/components/PromptMdEditor";
 import { AutoSignSuggestions } from "@/components/AutoSignSuggestions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Sparkles } from "lucide-react";
 
 export type CircuitBreakerState = "CLOSED" | "HALF_OPEN" | "OPEN";
 export type LoopStatus = "IDLE" | "RUNNING" | "PAUSED" | "COMPLETE" | "FAILED";
@@ -130,11 +131,12 @@ export function RalphLoopController({
             addLog(`📤 ${message.data}`);
             break;
             
-          case "state":
+          case "state": {
             const newState = message.data as RalphState;
             setState(newState);
             onStateChange?.(newState);
             break;
+          }
             
           case "iteration":
             addLog(`🔄 Iteration ${message.data.iteration} complete (${message.data.duration}ms)`);

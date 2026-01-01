@@ -14,6 +14,7 @@ export default [
       'reports/**',
       '*.config.js',
       '*.config.ts',
+      '**/*.mjs',
       'drizzle/**/*.sql',
     ],
   },

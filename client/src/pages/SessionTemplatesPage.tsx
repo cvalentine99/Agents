@@ -96,11 +96,12 @@ export default function SessionTemplatesPage() {
           comparison =
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
           break;
-        case "lastUsedAt":
+        case "lastUsedAt": {
           const aTime = a.lastUsedAt ? new Date(a.lastUsedAt).getTime() : 0;
           const bTime = b.lastUsedAt ? new Date(b.lastUsedAt).getTime() : 0;
           comparison = aTime - bTime;
           break;
+        }
       }
       return sortOrder === "asc" ? comparison : -comparison;
     });

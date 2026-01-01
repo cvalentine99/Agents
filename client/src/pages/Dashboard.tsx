@@ -44,6 +44,7 @@ import { LiveMonitor, type LoopMetric, type FileChange } from "@/components/Live
 import { SaveAsTemplateModal } from "@/components/SaveAsTemplateModal";
 import { TourTrigger } from "@/components/TourTrigger";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { toast } from "sonner";
 
 type NavSection = "wheel" | "flight" | "promptor" | "agents" | "breaker" | "assembly" | "diff" | "packs" | "session" | "monitor";
 
@@ -304,7 +305,7 @@ export default function Dashboard() {
             lastStateChange={new Date()}
             onReset={() => setCircuitBreakerState("CLOSED")}
             onAskHuman={() => {
-              // TODO: Implement human intervention request
+              toast.info("Human intervention requested - feature coming soon!");
             }}
           />
         );
@@ -326,10 +327,10 @@ export default function Dashboard() {
             onApproveHunk={handleApproveHunk}
             onDenyHunk={handleDenyHunk}
             onApplyApproved={() => {
-              // TODO: Implement applying approved hunks
+              toast.info("Applying approved changes - feature coming soon!");
             }}
             onRollback={() => {
-              // TODO: Implement rollback functionality
+              toast.info("Rollback to checkpoint - feature coming soon!");
             }}
             onToggleFile={handleToggleFile}
             hasCheckpoint={true}
