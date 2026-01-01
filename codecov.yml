@@ -1,0 +1,59 @@
+# Codecov Configuration for Agents by Valentine RF
+# Documentation: https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  precision: 2
+  round: down
+  range: "50...100"
+  
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 5%
+        informational: true
+        
+    patch:
+      default:
+        target: 80%
+        threshold: 5%
+        informational: true
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+comment:
+  layout: "reach,diff,flags,files,footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+  branches:
+    - main
+    - develop
+
+flags:
+  unittests:
+    paths:
+      - server/
+    carryforward: true
+    
+ignore:
+  - "server/_core/**"
+  - "server/**/*.test.ts"
+  - "server/**/*.spec.ts"
+  - "client/**"
+  - "drizzle/**"
+  - "node_modules/**"
+  - "dist/**"
+  - "coverage/**"
+  - "**/*.d.ts"
+
+# GitHub Checks
+github_checks:
+  annotations: true

@@ -3,8 +3,10 @@
 Your AI-powered software development partner implementing the RALPH Loop+ framework for autonomous coding.
 
 ![Purple Cyberpunk Theme](https://img.shields.io/badge/Theme-Purple%20Cyberpunk-8B5CF6)
-![Tests](https://img.shields.io/badge/Tests-273%20Passing-green)
+![Tests](https://img.shields.io/badge/Tests-502%20Passing-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+[![codecov](https://codecov.io/gh/cvalentine99/Agents/graph/badge.svg)](https://codecov.io/gh/cvalentine99/Agents)
+![CI](https://github.com/cvalentine99/Agents/actions/workflows/ci.yml/badge.svg)
 
 ## Overview
 

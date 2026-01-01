@@ -730,3 +730,10 @@
 - [x] Create Deep Research Engine tests (38 tests - 400+ lines coverage)
 - [x] Set up GitHub Actions CI/CD pipeline (.github/workflows/ci.yml)
 - [x] Verify all tests pass (502 tests across 25 files)
+
+## Codecov Integration
+- [x] Configure Vitest for coverage reporting (@vitest/coverage-v8)
+- [x] Update GitHub Actions workflow for Codecov upload
+- [x] Create codecov.yml configuration file
+- [x] Generate and verify coverage report locally (26.99% statements, 68% branches)
+- [x] Add coverage badges to README
