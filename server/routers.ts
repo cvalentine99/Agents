@@ -21,7 +21,9 @@ const sessionConfigSchema = z.object({
   noProgressThreshold: z.number().min(1).max(20).default(3),
   autoAskHuman: z.boolean().default(true),
   safetyMode: z.enum(["standard", "strict", "permissive"]).default("standard"),
-  selectedModel: z.enum(["codex", "claude", "gemini", "manus"]).default("claude"),
+  selectedModel: z
+    .enum(["codex", "claude", "gemini", "manus"])
+    .default("claude"),
   selectedProfile: z.string().default("patch_goblin"), // Built-in or custom profile ID
 });
 
@@ -43,7 +45,7 @@ const providerSchema = z.enum(["codex", "claude", "gemini", "manus"]);
 
 export const appRouter = router({
   system: systemRouter,
-  
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -57,14 +59,16 @@ export const appRouter = router({
   apiKeys: router({
     // Save/update API key
     save: protectedProcedure
-      .input(z.object({
-        provider: providerSchema,
-        apiKey: z.string().min(10),
-      }))
+      .input(
+        z.object({
+          provider: providerSchema,
+          apiKey: z.string().min(10),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const encryptedKey = encrypt(input.apiKey);
         const keyHint = getKeyHint(input.apiKey);
-        
+
         await db.saveApiKey({
           userId: ctx.user.id,
           provider: input.provider,
@@ -72,7 +76,7 @@ export const appRouter = router({
           keyHint,
           isValid: true,
         });
-        
+
         return { success: true, keyHint };
       }),
 
@@ -93,19 +97,23 @@ export const appRouter = router({
     validate: protectedProcedure
       .input(z.object({ provider: providerSchema }))
       .mutation(async ({ ctx, input }) => {
-        const apiKeyRecord = await db.getApiKeyForProvider(ctx.user.id, input.provider);
+        const apiKeyRecord = await db.getApiKeyForProvider(
+          ctx.user.id,
+          input.provider
+        );
         if (!apiKeyRecord) {
           return { valid: false, error: "No API key found for this provider" };
         }
-        
+
         try {
           const apiKey = decrypt(apiKeyRecord.encryptedKey);
-          
+
           // Basic validation - check if key has expected format
           let isValid = false;
           switch (input.provider) {
             case "claude":
-              isValid = apiKey.startsWith("sk-ant-") || apiKey.startsWith("sk-");
+              isValid =
+                apiKey.startsWith("sk-ant-") || apiKey.startsWith("sk-");
               break;
             case "codex":
               isValid = apiKey.startsWith("sk-") || apiKey.startsWith("sess-");
@@ -117,7 +125,7 @@ export const appRouter = router({
               isValid = apiKey.length > 10;
               break;
           }
-          
+
           await db.updateApiKeyValidity(apiKeyRecord.id, isValid);
           return { valid: isValid };
         } catch {
@@ -130,9 +138,12 @@ export const appRouter = router({
     getForProvider: protectedProcedure
       .input(z.object({ provider: providerSchema }))
       .query(async ({ ctx, input }) => {
-        const apiKeyRecord = await db.getApiKeyForProvider(ctx.user.id, input.provider);
+        const apiKeyRecord = await db.getApiKeyForProvider(
+          ctx.user.id,
+          input.provider
+        );
         if (!apiKeyRecord) return null;
-        
+
         return {
           id: apiKeyRecord.id,
           provider: apiKeyRecord.provider,
@@ -176,20 +187,28 @@ export const appRouter = router({
 
     // Update session
     update: protectedProcedure
-      .input(z.object({
-        sessionId: z.string(),
-        updates: z.object({
-          status: z.enum(["idle", "running", "paused", "complete", "failed"]).optional(),
-          currentIteration: z.number().optional(),
-          completionProgress: z.number().optional(),
-          circuitBreakerState: z.enum(["CLOSED", "HALF_OPEN", "OPEN"]).optional(),
-          noProgressCount: z.number().optional(),
-          selectedModel: z.enum(["codex", "claude", "gemini", "manus"]).optional(),
-          selectedProfile: z.string().optional(), // Built-in or custom profile ID
-          startedAt: z.date().optional(),
-          completedAt: z.date().optional(),
-        }),
-      }))
+      .input(
+        z.object({
+          sessionId: z.string(),
+          updates: z.object({
+            status: z
+              .enum(["idle", "running", "paused", "complete", "failed"])
+              .optional(),
+            currentIteration: z.number().optional(),
+            completionProgress: z.number().optional(),
+            circuitBreakerState: z
+              .enum(["CLOSED", "HALF_OPEN", "OPEN"])
+              .optional(),
+            noProgressCount: z.number().optional(),
+            selectedModel: z
+              .enum(["codex", "claude", "gemini", "manus"])
+              .optional(),
+            selectedProfile: z.string().optional(), // Built-in or custom profile ID
+            startedAt: z.date().optional(),
+            completedAt: z.date().optional(),
+          }),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // SECURITY: Verify ownership to prevent IDOR
         const session = await db.getSessionBySessionId(input.sessionId);
@@ -215,11 +234,13 @@ export const appRouter = router({
 
     // Start a loop (creates session + starts CLI execution)
     startLoop: protectedProcedure
-      .input(z.object({
-        config: sessionConfigSchema,
-        prompt: z.string(),
-        workingDirectory: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          config: sessionConfigSchema,
+          prompt: z.string(),
+          workingDirectory: z.string().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // Create session
         const sessionId = `session-${nanoid(12)}`;
@@ -230,15 +251,16 @@ export const appRouter = router({
           status: "running",
           startedAt: new Date(),
         });
-        
+
         // Get session to get the database ID
         const session = await db.getSessionBySessionId(sessionId);
         if (!session) throw new Error("Failed to create session");
-        
-        return { 
-          sessionId, 
+
+        return {
+          sessionId,
           sessionDbId: session.id,
-          message: "Session created. Connect to WebSocket for CLI output streaming." 
+          message:
+            "Session created. Connect to WebSocket for CLI output streaming.",
         };
       }),
   }),
@@ -247,12 +269,14 @@ export const appRouter = router({
   cli: router({
     // Create CLI execution record
     create: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        iteration: z.number(),
-        command: z.string(),
-        workingDirectory: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          iteration: z.number(),
+          command: z.string(),
+          workingDirectory: z.string().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // SECURITY: Verify session ownership to prevent IDOR
         const session = await db.getSessionById(input.sessionId);
@@ -265,18 +289,22 @@ export const appRouter = router({
 
     // Update CLI execution
     update: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        sessionId: z.number(), // Added for ownership verification
-        updates: z.object({
-          pid: z.number().optional(),
-          exitCode: z.number().optional(),
-          stdout: z.string().optional(),
-          stderr: z.string().optional(),
-          status: z.enum(["running", "completed", "failed", "killed"]).optional(),
-          completedAt: z.date().optional(),
-        }),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          sessionId: z.number(), // Added for ownership verification
+          updates: z.object({
+            pid: z.number().optional(),
+            exitCode: z.number().optional(),
+            stdout: z.string().optional(),
+            stderr: z.string().optional(),
+            status: z
+              .enum(["running", "completed", "failed", "killed"])
+              .optional(),
+            completedAt: z.date().optional(),
+          }),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // SECURITY: Verify session ownership to prevent IDOR
         const session = await db.getSessionById(input.sessionId);
@@ -312,11 +340,13 @@ export const appRouter = router({
   // ==================== COMPLETION CRITERIA ====================
   criteria: router({
     add: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        text: z.string(),
-        orderIndex: z.number().optional(),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          text: z.string(),
+          orderIndex: z.number().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // SECURITY: Verify session ownership to prevent IDOR
         const session = await db.getSessionById(input.sessionId);
@@ -339,7 +369,13 @@ export const appRouter = router({
       }),
 
     toggle: protectedProcedure
-      .input(z.object({ id: z.number(), sessionId: z.number(), checked: z.boolean() }))
+      .input(
+        z.object({
+          id: z.number(),
+          sessionId: z.number(),
+          checked: z.boolean(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // SECURITY: Verify session ownership to prevent IDOR
         const session = await db.getSessionById(input.sessionId);
@@ -366,16 +402,18 @@ export const appRouter = router({
   // ==================== METRICS ====================
   metrics: router({
     add: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        iteration: z.number(),
-        diffLines: z.number(),
-        testsRun: z.number(),
-        testsPassed: z.number(),
-        errorsDetected: z.number(),
-        duration: z.number(),
-        model: z.enum(["codex", "claude", "gemini", "manus"]),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          iteration: z.number(),
+          diffLines: z.number(),
+          testsRun: z.number(),
+          testsPassed: z.number(),
+          errorsDetected: z.number(),
+          duration: z.number(),
+          model: z.enum(["codex", "claude", "gemini", "manus"]),
+        })
+      )
       .mutation(async ({ input }) => {
         await db.addLoopMetric(input);
         return { success: true };
@@ -391,14 +429,16 @@ export const appRouter = router({
   // ==================== FILE CHANGES ====================
   fileChanges: router({
     add: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        iteration: z.number(),
-        path: z.string(),
-        changeType: z.enum(["added", "modified", "deleted"]),
-        linesAdded: z.number(),
-        linesRemoved: z.number(),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          iteration: z.number(),
+          path: z.string(),
+          changeType: z.enum(["added", "modified", "deleted"]),
+          linesAdded: z.number(),
+          linesRemoved: z.number(),
+        })
+      )
       .mutation(async ({ input }) => {
         await db.addFileChange(input);
         return { success: true };
@@ -438,10 +478,12 @@ export const appRouter = router({
   // ==================== ASSEMBLY LINE ====================
   assemblyLine: router({
     create: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        stageConfig: z.string(),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          stageConfig: z.string(),
+        })
+      )
       .mutation(async ({ input }) => {
         await db.createAssemblyLineRun(input);
         return { success: true };
@@ -454,16 +496,20 @@ export const appRouter = router({
       }),
 
     update: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        updates: z.object({
-          status: z.enum(["pending", "running", "complete", "failed"]).optional(),
-          currentStage: z.string().optional(),
-          output: z.string().optional(),
-          startedAt: z.date().optional(),
-          completedAt: z.date().optional(),
-        }),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          updates: z.object({
+            status: z
+              .enum(["pending", "running", "complete", "failed"])
+              .optional(),
+            currentStage: z.string().optional(),
+            output: z.string().optional(),
+            startedAt: z.date().optional(),
+            completedAt: z.date().optional(),
+          }),
+        })
+      )
       .mutation(async ({ input }) => {
         await db.updateAssemblyLineRun(input.id, input.updates);
         return { success: true };
@@ -473,13 +519,15 @@ export const appRouter = router({
   // ==================== DIFF HUNKS ====================
   diffHunks: router({
     add: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        iteration: z.number(),
-        filePath: z.string(),
-        hunkHeader: z.string(),
-        content: z.string(),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          iteration: z.number(),
+          filePath: z.string(),
+          hunkHeader: z.string(),
+          content: z.string(),
+        })
+      )
       .mutation(async ({ input }) => {
         await db.addDiffHunk(input);
         return { success: true };
@@ -503,23 +551,29 @@ export const appRouter = router({
   sessionTemplates: router({
     // Create a new session template
     create: protectedProcedure
-      .input(z.object({
-        name: z.string().min(1).max(255),
-        description: z.string().optional(),
-        tags: z.array(z.string()).optional(),
-        selectedModel: z.enum(["codex", "claude", "gemini", "manus"]).default("claude"),
-        selectedProfile: z.string().default("patch_goblin"), // Built-in or custom profile ID
-        ralphMode: z.boolean().default(true),
-        maxIterations: z.number().min(5).max(200).default(50),
-        noProgressThreshold: z.number().min(1).max(20).default(3),
-        autoAskHuman: z.boolean().default(true),
-        safetyMode: z.enum(["standard", "strict", "permissive"]).default("standard"),
-        promptGoal: z.string().optional(),
-        promptContext: z.string().optional(),
-        promptDoneWhen: z.string().optional(),
-        promptDoNot: z.string().optional(),
-        completionCriteria: z.array(z.string()).optional(),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(1).max(255),
+          description: z.string().optional(),
+          tags: z.array(z.string()).optional(),
+          selectedModel: z
+            .enum(["codex", "claude", "gemini", "manus"])
+            .default("claude"),
+          selectedProfile: z.string().default("patch_goblin"), // Built-in or custom profile ID
+          ralphMode: z.boolean().default(true),
+          maxIterations: z.number().min(5).max(200).default(50),
+          noProgressThreshold: z.number().min(1).max(20).default(3),
+          autoAskHuman: z.boolean().default(true),
+          safetyMode: z
+            .enum(["standard", "strict", "permissive"])
+            .default("standard"),
+          promptGoal: z.string().optional(),
+          promptContext: z.string().optional(),
+          promptDoneWhen: z.string().optional(),
+          promptDoNot: z.string().optional(),
+          completionCriteria: z.array(z.string()).optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const result = await db.createSessionTemplate({
           userId: ctx.user.id,
@@ -537,7 +591,9 @@ export const appRouter = router({
           promptContext: input.promptContext,
           promptDoneWhen: input.promptDoneWhen,
           promptDoNot: input.promptDoNot,
-          completionCriteria: input.completionCriteria ? JSON.stringify(input.completionCriteria) : null,
+          completionCriteria: input.completionCriteria
+            ? JSON.stringify(input.completionCriteria)
+            : null,
         });
         return { id: result.insertId, name: input.name, success: true };
       }),
@@ -548,7 +604,9 @@ export const appRouter = router({
       return templates.map(t => ({
         ...t,
         tags: t.tags ? JSON.parse(t.tags) : [],
-        completionCriteria: t.completionCriteria ? JSON.parse(t.completionCriteria) : [],
+        completionCriteria: t.completionCriteria
+          ? JSON.parse(t.completionCriteria)
+          : [],
       }));
     }),
 
@@ -561,41 +619,49 @@ export const appRouter = router({
         return {
           ...template,
           tags: template.tags ? JSON.parse(template.tags) : [],
-          completionCriteria: template.completionCriteria ? JSON.parse(template.completionCriteria) : [],
+          completionCriteria: template.completionCriteria
+            ? JSON.parse(template.completionCriteria)
+            : [],
         };
       }),
 
     // Update a template
     update: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        updates: z.object({
-          name: z.string().min(1).max(255).optional(),
-          description: z.string().optional(),
-          tags: z.array(z.string()).optional(),
-          selectedModel: z.enum(["codex", "claude", "gemini", "manus"]).optional(),
-          selectedProfile: z.string().optional(), // Built-in or custom profile ID
-          ralphMode: z.boolean().optional(),
-          maxIterations: z.number().min(5).max(200).optional(),
-          noProgressThreshold: z.number().min(1).max(20).optional(),
-          autoAskHuman: z.boolean().optional(),
-          safetyMode: z.enum(["standard", "strict", "permissive"]).optional(),
-          promptGoal: z.string().optional(),
-          promptContext: z.string().optional(),
-          promptDoneWhen: z.string().optional(),
-          promptDoNot: z.string().optional(),
-          completionCriteria: z.array(z.string()).optional(),
-        }),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          updates: z.object({
+            name: z.string().min(1).max(255).optional(),
+            description: z.string().optional(),
+            tags: z.array(z.string()).optional(),
+            selectedModel: z
+              .enum(["codex", "claude", "gemini", "manus"])
+              .optional(),
+            selectedProfile: z.string().optional(), // Built-in or custom profile ID
+            ralphMode: z.boolean().optional(),
+            maxIterations: z.number().min(5).max(200).optional(),
+            noProgressThreshold: z.number().min(1).max(20).optional(),
+            autoAskHuman: z.boolean().optional(),
+            safetyMode: z.enum(["standard", "strict", "permissive"]).optional(),
+            promptGoal: z.string().optional(),
+            promptContext: z.string().optional(),
+            promptDoneWhen: z.string().optional(),
+            promptDoNot: z.string().optional(),
+            completionCriteria: z.array(z.string()).optional(),
+          }),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const updates: Record<string, unknown> = { ...input.updates };
         if (input.updates.tags) {
           updates.tags = JSON.stringify(input.updates.tags);
         }
         if (input.updates.completionCriteria) {
-          updates.completionCriteria = JSON.stringify(input.updates.completionCriteria);
+          updates.completionCriteria = JSON.stringify(
+            input.updates.completionCriteria
+          );
         }
-        await db.updateSessionTemplate(input.id, ctx.user.id, updates as any);
+        await db.updateSessionTemplate(input.id, ctx.user.id, updates as Record<string, unknown>);
         return { success: true };
       }),
 
@@ -617,7 +683,9 @@ export const appRouter = router({
         return {
           ...template,
           tags: template.tags ? JSON.parse(template.tags) : [],
-          completionCriteria: template.completionCriteria ? JSON.parse(template.completionCriteria) : [],
+          completionCriteria: template.completionCriteria
+            ? JSON.parse(template.completionCriteria)
+            : [],
         };
       }),
 
@@ -625,11 +693,16 @@ export const appRouter = router({
     search: protectedProcedure
       .input(z.object({ query: z.string() }))
       .query(async ({ ctx, input }) => {
-        const templates = await db.searchSessionTemplates(ctx.user.id, input.query);
+        const templates = await db.searchSessionTemplates(
+          ctx.user.id,
+          input.query
+        );
         return templates.map(t => ({
           ...t,
           tags: t.tags ? JSON.parse(t.tags) : [],
-          completionCriteria: t.completionCriteria ? JSON.parse(t.completionCriteria) : [],
+          completionCriteria: t.completionCriteria
+            ? JSON.parse(t.completionCriteria)
+            : [],
         }));
       }),
   }),
@@ -637,13 +710,15 @@ export const appRouter = router({
   // ==================== CHECKPOINTS ====================
   checkpoints: router({
     create: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        iteration: z.number(),
-        name: z.string().optional(),
-        description: z.string().optional(),
-        snapshotData: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          iteration: z.number(),
+          name: z.string().optional(),
+          description: z.string().optional(),
+          snapshotData: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         await db.createCheckpoint(input);
         return { success: true };
@@ -666,13 +741,16 @@ export const appRouter = router({
   research: router({
     // Create a new research session
     create: protectedProcedure
-      .input(z.object({
-        topic: z.string().min(5).max(2000),
-        depth: z.enum(["quick", "standard", "deep"]).default("standard"),
-      }))
+      .input(
+        z.object({
+          topic: z.string().min(5).max(2000),
+          depth: z.enum(["quick", "standard", "deep"]).default("standard"),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
-        const totalSteps = input.depth === "quick" ? 3 : input.depth === "standard" ? 5 : 8;
-        
+        const totalSteps =
+          input.depth === "quick" ? 3 : input.depth === "standard" ? 5 : 8;
+
         const result = await db.createResearchSession({
           userId: ctx.user.id,
           topic: input.topic,
@@ -681,10 +759,10 @@ export const appRouter = router({
           currentStep: 0,
           totalSteps,
         });
-        
+
         // Get the inserted ID
         const insertId = Number(result[0].insertId);
-        
+
         return { id: insertId, success: true };
       }),
 
@@ -695,10 +773,10 @@ export const appRouter = router({
         const session = await db.getResearchSession(input.id);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        
+
         const findings = await db.getResearchFindings(input.id);
         const steps = await db.getResearchSteps(input.id);
-        
+
         return { ...session, findings, steps };
       }),
 
@@ -714,7 +792,7 @@ export const appRouter = router({
         const session = await db.getResearchSession(input.id);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        
+
         await db.deleteResearchSession(input.id);
         return { success: true };
       }),
@@ -726,17 +804,18 @@ export const appRouter = router({
         const session = await db.getResearchSession(input.id);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        if (session.status !== "pending") throw new Error("Research already started");
-        
+        if (session.status !== "pending")
+          throw new Error("Research already started");
+
         // Update status to researching
         await db.updateResearchSession(input.id, {
           status: "researching",
           startedAt: new Date(),
         });
-        
+
         // Import LLM helper
         const { invokeLLM } = await import("./_core/llm");
-        
+
         try {
           // Step 1: Planning - Understand the research topic and create a plan
           await db.addResearchStep({
@@ -744,11 +823,12 @@ export const appRouter = router({
             stepNumber: 1,
             stepType: "planning",
             query: session.topic,
-            reasoning: "Understanding the research topic and creating a research plan",
+            reasoning:
+              "Understanding the research topic and creating a research plan",
             status: "running",
             startedAt: new Date(),
           });
-          
+
           const planningResponse = await invokeLLM({
             messages: [
               {
@@ -772,18 +852,28 @@ Output a JSON object with: { "keyQuestions": ["question1", "question2", ...], "s
                   properties: {
                     keyQuestions: { type: "array", items: { type: "string" } },
                     searchQueries: { type: "array", items: { type: "string" } },
-                    expectedSources: { type: "array", items: { type: "string" } },
+                    expectedSources: {
+                      type: "array",
+                      items: { type: "string" },
+                    },
                   },
-                  required: ["keyQuestions", "searchQueries", "expectedSources"],
+                  required: [
+                    "keyQuestions",
+                    "searchQueries",
+                    "expectedSources",
+                  ],
                   additionalProperties: false,
                 },
               },
             },
           });
-          
+
           const planContent = planningResponse.choices[0]?.message?.content;
-          const plan = typeof planContent === "string" ? JSON.parse(planContent) : planContent;
-          
+          const plan =
+            typeof planContent === "string"
+              ? JSON.parse(planContent)
+              : planContent;
+
           // Update step 1 as complete
           const steps = await db.getResearchSteps(input.id);
           const step1 = steps.find(s => s.stepNumber === 1);
@@ -794,9 +884,9 @@ Output a JSON object with: { "keyQuestions": ["question1", "question2", ...], "s
               completedAt: new Date(),
             });
           }
-          
+
           await db.updateResearchSession(input.id, { currentStep: 1 });
-          
+
           // Step 2: Searching - Research each key question
           await db.addResearchStep({
             researchSessionId: input.id,
@@ -807,7 +897,7 @@ Output a JSON object with: { "keyQuestions": ["question1", "question2", ...], "s
             status: "running",
             startedAt: new Date(),
           });
-          
+
           const searchResponse = await invokeLLM({
             messages: [
               {
@@ -842,11 +932,29 @@ Output a JSON array of findings.`,
                         properties: {
                           title: { type: "string" },
                           content: { type: "string" },
-                          sourceType: { type: "string", enum: ["web", "paper", "documentation", "code", "analysis"] },
+                          sourceType: {
+                            type: "string",
+                            enum: [
+                              "web",
+                              "paper",
+                              "documentation",
+                              "code",
+                              "analysis",
+                            ],
+                          },
                           relevanceScore: { type: "number" },
-                          confidence: { type: "string", enum: ["low", "medium", "high"] },
+                          confidence: {
+                            type: "string",
+                            enum: ["low", "medium", "high"],
+                          },
                         },
-                        required: ["title", "content", "sourceType", "relevanceScore", "confidence"],
+                        required: [
+                          "title",
+                          "content",
+                          "sourceType",
+                          "relevanceScore",
+                          "confidence",
+                        ],
                         additionalProperties: false,
                       },
                     },
@@ -857,10 +965,13 @@ Output a JSON array of findings.`,
               },
             },
           });
-          
+
           const searchContent = searchResponse.choices[0]?.message?.content;
-          const searchResults = typeof searchContent === "string" ? JSON.parse(searchContent) : searchContent;
-          
+          const searchResults =
+            typeof searchContent === "string"
+              ? JSON.parse(searchContent)
+              : searchContent;
+
           // Save findings to database
           for (const finding of searchResults.findings || []) {
             await db.addResearchFinding({
@@ -868,12 +979,15 @@ Output a JSON array of findings.`,
               title: finding.title,
               content: finding.content,
               sourceType: finding.sourceType,
-              relevanceScore: Math.min(100, Math.max(0, finding.relevanceScore)),
+              relevanceScore: Math.min(
+                100,
+                Math.max(0, finding.relevanceScore)
+              ),
               confidence: finding.confidence,
               stepNumber: 2,
             });
           }
-          
+
           // Update step 2
           const steps2 = await db.getResearchSteps(input.id);
           const step2 = steps2.find(s => s.stepNumber === 2);
@@ -884,12 +998,12 @@ Output a JSON array of findings.`,
               completedAt: new Date(),
             });
           }
-          
-          await db.updateResearchSession(input.id, { 
+
+          await db.updateResearchSession(input.id, {
             currentStep: 2,
             sourcesCount: searchResults.findings?.length || 0,
           });
-          
+
           // Step 3: Synthesizing - Create final summary
           await db.addResearchStep({
             researchSessionId: input.id,
@@ -899,7 +1013,7 @@ Output a JSON array of findings.`,
             status: "running",
             startedAt: new Date(),
           });
-          
+
           const synthesisResponse = await invokeLLM({
             messages: [
               {
@@ -919,10 +1033,11 @@ Include:
               },
             ],
           });
-          
+
           const summary = synthesisResponse.choices[0]?.message?.content;
-          const summaryText = typeof summary === "string" ? summary : JSON.stringify(summary);
-          
+          const summaryText =
+            typeof summary === "string" ? summary : JSON.stringify(summary);
+
           // Update step 3
           const steps3 = await db.getResearchSteps(input.id);
           const step3 = steps3.find(s => s.stepNumber === 3);
@@ -933,13 +1048,13 @@ Include:
               completedAt: new Date(),
             });
           }
-          
+
           // Calculate tokens used
-          const tokensUsed = 
+          const tokensUsed =
             (planningResponse.usage?.total_tokens || 0) +
             (searchResponse.usage?.total_tokens || 0) +
             (synthesisResponse.usage?.total_tokens || 0);
-          
+
           // Update session as complete
           await db.updateResearchSession(input.id, {
             status: "complete",
@@ -948,9 +1063,8 @@ Include:
             tokensUsed,
             completedAt: new Date(),
           });
-          
+
           return { success: true, summary: summaryText };
-          
         } catch (error) {
           // Mark as failed
           await db.updateResearchSession(input.id, {
@@ -968,7 +1082,7 @@ Include:
         const session = await db.getResearchSession(input.id);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        
+
         // Generate share token if not exists
         let shareToken = session.shareToken;
         if (!shareToken) {
@@ -981,7 +1095,7 @@ Include:
           // Just enable public access
           await db.updateResearchSession(input.id, { isPublic: true });
         }
-        
+
         return { shareToken, success: true };
       }),
 
@@ -992,7 +1106,7 @@ Include:
         const session = await db.getResearchSession(input.id);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        
+
         await db.updateResearchSession(input.id, { isPublic: false });
         return { success: true };
       }),
@@ -1004,11 +1118,11 @@ Include:
         const session = await db.getResearchByShareToken(input.shareToken);
         if (!session) throw new Error("Research not found");
         if (!session.isPublic) throw new Error("Research is not public");
-        
+
         const findings = await db.getResearchFindings(session.id);
         const steps = await db.getResearchSteps(session.id);
         const followUps = await db.getResearchFollowUps(session.id);
-        
+
         // Return without sensitive user info
         return {
           id: session.id,
@@ -1027,31 +1141,36 @@ Include:
 
     // Add follow-up question
     askFollowUp: protectedProcedure
-      .input(z.object({
-        researchSessionId: z.number(),
-        question: z.string().min(5).max(1000),
-      }))
+      .input(
+        z.object({
+          researchSessionId: z.number(),
+          question: z.string().min(5).max(1000),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const session = await db.getResearchSession(input.researchSessionId);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        if (session.status !== "complete") throw new Error("Research must be complete to ask follow-up questions");
-        
+        if (session.status !== "complete")
+          throw new Error(
+            "Research must be complete to ask follow-up questions"
+          );
+
         // Create follow-up entry
         const result = await db.addResearchFollowUp({
           researchSessionId: input.researchSessionId,
           question: input.question,
           status: "pending",
         });
-        
+
         const followUpId = Number(result[0].insertId);
-        
+
         // Process the follow-up question with LLM
         const { invokeLLM } = await import("./_core/llm");
-        
+
         try {
           await db.updateResearchFollowUp(followUpId, { status: "processing" });
-          
+
           const response = await invokeLLM({
             messages: [
               {
@@ -1072,19 +1191,19 @@ Use markdown formatting for better readability.`,
               },
             ],
           });
-          
+
           const answer = response.choices[0]?.message?.content;
-          const answerText = typeof answer === "string" ? answer : JSON.stringify(answer);
-          
+          const answerText =
+            typeof answer === "string" ? answer : JSON.stringify(answer);
+
           await db.updateResearchFollowUp(followUpId, {
             answer: answerText,
             status: "complete",
             tokensUsed: response.usage?.total_tokens || 0,
             answeredAt: new Date(),
           });
-          
+
           return { id: followUpId, answer: answerText, success: true };
-          
         } catch (error) {
           await db.updateResearchFollowUp(followUpId, { status: "failed" });
           throw error;
@@ -1098,7 +1217,7 @@ Use markdown formatting for better readability.`,
         const session = await db.getResearchSession(input.researchSessionId);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        
+
         return db.getResearchFollowUps(input.researchSessionId);
       }),
 
@@ -1109,22 +1228,22 @@ Use markdown formatting for better readability.`,
         const session = await db.getResearchSession(input.id);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        
+
         const findings = await db.getResearchFindings(input.id);
         const followUps = await db.getResearchFollowUps(input.id);
-        
+
         // Build markdown document
         let markdown = `# ${session.topic}\n\n`;
         markdown += `**Research Depth:** ${session.depth}\n`;
         markdown += `**Status:** ${session.status}\n`;
         markdown += `**Sources:** ${session.sourcesCount}\n`;
-        markdown += `**Date:** ${session.createdAt.toISOString().split('T')[0]}\n\n`;
+        markdown += `**Date:** ${session.createdAt.toISOString().split("T")[0]}\n\n`;
         markdown += `---\n\n`;
-        
+
         if (session.summary) {
           markdown += session.summary + "\n\n";
         }
-        
+
         if (findings.length > 0) {
           markdown += `---\n\n## Research Findings\n\n`;
           for (const finding of findings) {
@@ -1133,7 +1252,7 @@ Use markdown formatting for better readability.`,
             markdown += `${finding.content}\n\n`;
           }
         }
-        
+
         if (followUps.length > 0) {
           markdown += `---\n\n## Follow-up Questions\n\n`;
           for (const followUp of followUps) {
@@ -1143,9 +1262,9 @@ Use markdown formatting for better readability.`,
             }
           }
         }
-        
+
         markdown += `---\n\n*Generated by Agents by Valentine RF - Deep Research*\n`;
-        
+
         return { markdown, filename: `research-${session.id}.md` };
       }),
 
@@ -1156,10 +1275,10 @@ Use markdown formatting for better readability.`,
         const session = await db.getResearchSession(input.id);
         if (!session) throw new Error("Research session not found");
         if (session.userId !== ctx.user.id) throw new Error("Unauthorized");
-        
+
         const findings = await db.getResearchFindings(input.id);
         const followUps = await db.getResearchFollowUps(input.id);
-        
+
         const pdfBuffer = await generateResearchPDF({
           topic: session.topic,
           depth: session.depth,
@@ -1180,10 +1299,10 @@ Use markdown formatting for better readability.`,
             answer: f.answer,
           })),
         });
-        
+
         const filename = generatePDFFilename(session.topic);
         const base64 = pdfBuffer.toString("base64");
-        
+
         return { pdf: base64, filename };
       }),
   }),
@@ -1192,16 +1311,18 @@ Use markdown formatting for better readability.`,
   templates: router({
     // Create a custom template
     create: protectedProcedure
-      .input(z.object({
-        name: z.string().min(3).max(255),
-        description: z.string().max(1000).optional(),
-        topic: z.string().min(5).max(2000),
-        category: z.string().max(100).default("custom"),
-        categoryId: z.number().optional(),
-        depth: z.enum(["quick", "standard", "deep"]).default("standard"),
-        tags: z.array(z.string()).max(10).optional(),
-        isPublic: z.boolean().default(false),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(3).max(255),
+          description: z.string().max(1000).optional(),
+          topic: z.string().min(5).max(2000),
+          category: z.string().max(100).default("custom"),
+          categoryId: z.number().optional(),
+          depth: z.enum(["quick", "standard", "deep"]).default("standard"),
+          tags: z.array(z.string()).max(10).optional(),
+          isPublic: z.boolean().default(false),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const result = await db.createCustomTemplate({
           userId: ctx.user.id,
@@ -1233,17 +1354,19 @@ Use markdown formatting for better readability.`,
 
     // Update a custom template
     update: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        name: z.string().min(3).max(255).optional(),
-        description: z.string().max(1000).optional(),
-        topic: z.string().min(5).max(2000).optional(),
-        category: z.string().max(100).optional(),
-        categoryId: z.number().nullable().optional(),
-        depth: z.enum(["quick", "standard", "deep"]).optional(),
-        tags: z.array(z.string()).max(10).optional(),
-        isPublic: z.boolean().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().min(3).max(255).optional(),
+          description: z.string().max(1000).optional(),
+          topic: z.string().min(5).max(2000).optional(),
+          category: z.string().max(100).optional(),
+          categoryId: z.number().nullable().optional(),
+          depth: z.enum(["quick", "standard", "deep"]).optional(),
+          tags: z.array(z.string()).max(10).optional(),
+          isPublic: z.boolean().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const { id, ...updates } = input;
         await db.updateCustomTemplate(id, ctx.user.id, updates);
@@ -1260,20 +1383,26 @@ Use markdown formatting for better readability.`,
 
     // Toggle favorite on a template
     toggleFavorite: protectedProcedure
-      .input(z.object({
-        templateId: z.string(),
-        templateType: z.enum(["builtin", "custom"]),
-        customTemplateId: z.number().optional(),
-      }))
+      .input(
+        z.object({
+          templateId: z.string(),
+          templateType: z.enum(["builtin", "custom"]),
+          customTemplateId: z.number().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const isFavorited = await db.isTemplateFavorited(
           ctx.user.id,
           input.templateId,
           input.templateType
         );
-        
+
         if (isFavorited) {
-          await db.removeTemplateFavorite(ctx.user.id, input.templateId, input.templateType);
+          await db.removeTemplateFavorite(
+            ctx.user.id,
+            input.templateId,
+            input.templateType
+          );
           return { favorited: false };
         } else {
           await db.addTemplateFavorite({
@@ -1293,12 +1422,14 @@ Use markdown formatting for better readability.`,
 
     // Track template usage
     trackUsage: protectedProcedure
-      .input(z.object({
-        templateId: z.string(),
-        templateType: z.enum(["builtin", "custom"]),
-        customTemplateId: z.number().optional(),
-        researchSessionId: z.number().optional(),
-      }))
+      .input(
+        z.object({
+          templateId: z.string(),
+          templateType: z.enum(["builtin", "custom"]),
+          customTemplateId: z.number().optional(),
+          researchSessionId: z.number().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         await db.trackTemplateUsage({
           userId: ctx.user.id,
@@ -1307,12 +1438,12 @@ Use markdown formatting for better readability.`,
           customTemplateId: input.customTemplateId,
           researchSessionId: input.researchSessionId,
         });
-        
+
         // Increment usage count for custom templates
         if (input.templateType === "custom" && input.customTemplateId) {
           await db.incrementCustomTemplateUsage(input.customTemplateId);
         }
-        
+
         return { success: true };
       }),
 
@@ -1327,15 +1458,20 @@ Use markdown formatting for better readability.`,
     }),
 
     // ==================== CATEGORIES ====================
-    
+
     // Create a category
     createCategory: protectedProcedure
-      .input(z.object({
-        name: z.string().min(2).max(100),
-        description: z.string().max(500).optional(),
-        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default("#8b5cf6"),
-        icon: z.string().max(50).default("folder"),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(2).max(100),
+          description: z.string().max(500).optional(),
+          color: z
+            .string()
+            .regex(/^#[0-9A-Fa-f]{6}$/)
+            .default("#8b5cf6"),
+          icon: z.string().max(50).default("folder"),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const result = await db.createUserCategory({
           userId: ctx.user.id,
@@ -1354,14 +1490,19 @@ Use markdown formatting for better readability.`,
 
     // Update a category
     updateCategory: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        name: z.string().min(2).max(100).optional(),
-        description: z.string().max(500).optional(),
-        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
-        icon: z.string().max(50).optional(),
-        sortOrder: z.number().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().min(2).max(100).optional(),
+          description: z.string().max(500).optional(),
+          color: z
+            .string()
+            .regex(/^#[0-9A-Fa-f]{6}$/)
+            .optional(),
+          icon: z.string().max(50).optional(),
+          sortOrder: z.number().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const { id, ...updates } = input;
         await db.updateUserCategory(id, ctx.user.id, updates);
@@ -1377,12 +1518,12 @@ Use markdown formatting for better readability.`,
       }),
 
     // ==================== IMPORT/EXPORT ====================
-    
+
     // Export all user's custom templates
     exportTemplates: protectedProcedure.query(async ({ ctx }) => {
       const templates = await db.exportUserTemplates(ctx.user.id);
       const categories = await db.getUserCategories(ctx.user.id);
-      
+
       return {
         version: "1.0",
         exportedAt: new Date().toISOString(),
@@ -1398,33 +1539,41 @@ Use markdown formatting for better readability.`,
 
     // Import templates from JSON
     importTemplates: protectedProcedure
-      .input(z.object({
-        templates: z.array(z.object({
-          name: z.string(),
-          description: z.string().nullable().optional(),
-          topic: z.string(),
-          category: z.string().optional(),
-          categoryName: z.string().optional(),
-          depth: z.enum(["quick", "standard", "deep"]).optional(),
-          tags: z.array(z.string()).nullable().optional(),
-        })),
-        categories: z.array(z.object({
-          name: z.string(),
-          description: z.string().nullable().optional(),
-          color: z.string().optional(),
-          icon: z.string().optional(),
-        })).optional(),
-        createMissingCategories: z.boolean().default(true),
-      }))
+      .input(
+        z.object({
+          templates: z.array(
+            z.object({
+              name: z.string(),
+              description: z.string().nullable().optional(),
+              topic: z.string(),
+              category: z.string().optional(),
+              categoryName: z.string().optional(),
+              depth: z.enum(["quick", "standard", "deep"]).optional(),
+              tags: z.array(z.string()).nullable().optional(),
+            })
+          ),
+          categories: z
+            .array(
+              z.object({
+                name: z.string(),
+                description: z.string().nullable().optional(),
+                color: z.string().optional(),
+                icon: z.string().optional(),
+              })
+            )
+            .optional(),
+          createMissingCategories: z.boolean().default(true),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // First, create any missing categories if requested
         const categoryMap = new Map<string, number>();
         const existingCategories = await db.getUserCategories(ctx.user.id);
-        
+
         for (const cat of existingCategories) {
           categoryMap.set(cat.name, cat.id);
         }
-        
+
         if (input.createMissingCategories && input.categories) {
           for (const cat of input.categories) {
             if (!categoryMap.has(cat.name)) {
@@ -1439,7 +1588,7 @@ Use markdown formatting for better readability.`,
             }
           }
         }
-        
+
         // Import templates
         const result = await db.importUserTemplates(
           ctx.user.id,
@@ -1454,7 +1603,7 @@ Use markdown formatting for better readability.`,
           })),
           categoryMap
         );
-        
+
         return result;
       }),
   }),
@@ -1463,103 +1612,132 @@ Use markdown formatting for better readability.`,
   promptMd: router({
     // Get current PROMPT.md for a project
     get: protectedProcedure
-      .input(z.object({
-        projectPath: z.string().min(1),
-      }))
+      .input(
+        z.object({
+          projectPath: z.string().min(1),
+        })
+      )
       .query(async ({ ctx, input }) => {
         return promptMd.getPrompt(ctx.user.id, input.projectPath);
       }),
 
     // Get PROMPT.md version history
     getHistory: protectedProcedure
-      .input(z.object({
-        projectPath: z.string().min(1),
-      }))
+      .input(
+        z.object({
+          projectPath: z.string().min(1),
+        })
+      )
       .query(async ({ ctx, input }) => {
         return promptMd.getPromptHistory(ctx.user.id, input.projectPath);
       }),
 
     // Save/update PROMPT.md
     save: protectedProcedure
-      .input(z.object({
-        projectPath: z.string().min(1),
-        content: z.string().min(1),
-      }))
+      .input(
+        z.object({
+          projectPath: z.string().min(1),
+          content: z.string().min(1),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
-        return promptMd.savePrompt(ctx.user.id, input.projectPath, input.content);
+        return promptMd.savePrompt(
+          ctx.user.id,
+          input.projectPath,
+          input.content
+        );
       }),
 
     // Initialize PROMPT.md with default template
     initialize: protectedProcedure
-      .input(z.object({
-        projectPath: z.string().min(1),
-      }))
+      .input(
+        z.object({
+          projectPath: z.string().min(1),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         return promptMd.initializePrompt(ctx.user.id, input.projectPath);
       }),
 
     // Add a sign to PROMPT.md
     addSign: protectedProcedure
-      .input(z.object({
-        projectPath: z.string().min(1),
-        signText: z.string().min(1),
-        failurePattern: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          projectPath: z.string().min(1),
+          signText: z.string().min(1),
+          failurePattern: z.string().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
-        return promptMd.addSign(ctx.user.id, input.projectPath, input.signText, input.failurePattern);
+        return promptMd.addSign(
+          ctx.user.id,
+          input.projectPath,
+          input.signText,
+          input.failurePattern
+        );
       }),
 
     // Get suggested signs for a failure pattern
     getSuggestedSigns: publicProcedure
-      .input(z.object({
-        failurePattern: z.string().min(1),
-      }))
+      .input(
+        z.object({
+          failurePattern: z.string().min(1),
+        })
+      )
       .query(async ({ input }) => {
         return promptMd.getSuggestedSigns(input.failurePattern);
       }),
 
     // Get all signs for a prompt
     getSigns: protectedProcedure
-      .input(z.object({
-        promptId: z.number(),
-      }))
+      .input(
+        z.object({
+          promptId: z.number(),
+        })
+      )
       .query(async ({ input }) => {
         return promptMd.getPromptSigns(input.promptId);
       }),
 
     // Detect failure pattern from error output
     detectFailurePattern: publicProcedure
-      .input(z.object({
-        errorOutput: z.string().min(1),
-      }))
+      .input(
+        z.object({
+          errorOutput: z.string().min(1),
+        })
+      )
       .query(async ({ input }) => {
         return promptMd.detectFailurePattern(input.errorOutput);
       }),
 
     // List all projects with PROMPT.md for the user
-    listProjects: protectedProcedure
-      .query(async ({ ctx }) => {
-        return promptMd.listUserProjects(ctx.user.id);
-      }),
+    listProjects: protectedProcedure.query(async ({ ctx }) => {
+      return promptMd.listUserProjects(ctx.user.id);
+    }),
 
     // Get default template
-    getDefaultTemplate: publicProcedure
-      .query(async () => {
-        return promptMd.DEFAULT_PROMPT_TEMPLATE;
-      }),
+    getDefaultTemplate: publicProcedure.query(async () => {
+      return promptMd.DEFAULT_PROMPT_TEMPLATE;
+    }),
   }),
 
   // ==================== Auto-Sign Suggestions ====================
   autoSign: router({
     // Record a failure for auto-suggestion tracking
     recordFailure: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        errorOutput: z.string(),
-        iteration: z.number(),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          errorOutput: z.string(),
+          iteration: z.number(),
+        })
+      )
       .mutation(async ({ input }) => {
-        autoSign.recordFailure(input.sessionId, input.errorOutput, input.iteration);
+        autoSign.recordFailure(
+          input.sessionId,
+          input.errorOutput,
+          input.iteration
+        );
         return { success: true };
       }),
 
@@ -1580,11 +1758,13 @@ Use markdown formatting for better readability.`,
 
     // Dismiss a suggestion
     dismissSuggestion: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        pattern: z.string(),
-        sign: z.string(),
-      }))
+      .input(
+        z.object({
+          sessionId: z.number(),
+          pattern: z.string(),
+          sign: z.string(),
+        })
+      )
       .mutation(async ({ input }) => {
         autoSign.dismissSuggestion(input.sessionId, input.pattern, input.sign);
         return { success: true };
@@ -1632,10 +1812,12 @@ Use markdown formatting for better readability.`,
   fileBrowser: router({
     // List directory contents
     listDirectory: protectedProcedure
-      .input(z.object({
-        path: z.string().default('/home/ubuntu'),
-        directoriesOnly: z.boolean().default(true),
-      }))
+      .input(
+        z.object({
+          path: z.string().default("/home/ubuntu"),
+          directoriesOnly: z.boolean().default(true),
+        })
+      )
       .query(async ({ input }) => {
         return fileBrowser.listDirectory(input.path, input.directoriesOnly);
       }),
@@ -1648,19 +1830,23 @@ Use markdown formatting for better readability.`,
       }),
 
     // Get recent directories
-    getRecentDirectories: protectedProcedure
-      .query(async () => {
-        return { directories: fileBrowser.getRecentDirectories() };
-      }),
+    getRecentDirectories: protectedProcedure.query(async () => {
+      return { directories: fileBrowser.getRecentDirectories() };
+    }),
 
     // Create a new directory
     createDirectory: protectedProcedure
-      .input(z.object({
-        parentPath: z.string(),
-        dirName: z.string().min(1).max(255),
-      }))
+      .input(
+        z.object({
+          parentPath: z.string(),
+          dirName: z.string().min(1).max(255),
+        })
+      )
       .mutation(async ({ input }) => {
-        const newPath = await fileBrowser.createDirectory(input.parentPath, input.dirName);
+        const newPath = await fileBrowser.createDirectory(
+          input.parentPath,
+          input.dirName
+        );
         return { path: newPath };
       }),
   }),
@@ -1669,14 +1855,18 @@ Use markdown formatting for better readability.`,
   rag: router({
     // Document Management
     ingestDocument: protectedProcedure
-      .input(z.object({
-        title: z.string().min(1).max(255),
-        content: z.string().min(10),
-        source: z.string().max(512).default("manual-upload"),
-        sourceType: z.enum(["file", "url", "text", "code", "documentation"]).default("text"),
-        tags: z.array(z.string()).max(20).optional(),
-        metadata: z.record(z.string(), z.unknown()).optional(),
-      }))
+      .input(
+        z.object({
+          title: z.string().min(1).max(255),
+          content: z.string().min(10),
+          source: z.string().max(512).default("manual-upload"),
+          sourceType: z
+            .enum(["file", "url", "text", "code", "documentation"])
+            .default("text"),
+          tags: z.array(z.string()).max(20).optional(),
+          metadata: z.record(z.string(), z.unknown()).optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const result = await rag.ingestDocument(
           ctx.user.id,
@@ -1703,20 +1893,24 @@ Use markdown formatting for better readability.`,
 
     // Semantic Search
     search: protectedProcedure
-      .input(z.object({
-        query: z.string().min(1).max(1000),
-        topK: z.number().min(1).max(20).default(5),
-      }))
+      .input(
+        z.object({
+          query: z.string().min(1).max(1000),
+          topK: z.number().min(1).max(20).default(5),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         return rag.semanticSearch(ctx.user.id, input.query, input.topK);
       }),
 
     // Conversation Management
     createConversation: protectedProcedure
-      .input(z.object({
-        title: z.string().max(255).optional(),
-        systemPrompt: z.string().max(5000).optional(),
-      }))
+      .input(
+        z.object({
+          title: z.string().max(255).optional(),
+          systemPrompt: z.string().max(5000).optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const conversationId = await rag.createConversation(
           ctx.user.id,
@@ -1727,9 +1921,13 @@ Use markdown formatting for better readability.`,
       }),
 
     listConversations: protectedProcedure
-      .input(z.object({
-        includeArchived: z.boolean().default(false),
-      }).optional())
+      .input(
+        z
+          .object({
+            includeArchived: z.boolean().default(false),
+          })
+          .optional()
+      )
       .query(async ({ ctx, input }) => {
         return rag.listConversations(ctx.user.id, input?.includeArchived);
       }),
@@ -1737,7 +1935,10 @@ Use markdown formatting for better readability.`,
     getConversation: protectedProcedure
       .input(z.object({ conversationId: z.number() }))
       .query(async ({ ctx, input }) => {
-        const conversation = await rag.getConversation(input.conversationId, ctx.user.id);
+        const conversation = await rag.getConversation(
+          input.conversationId,
+          ctx.user.id
+        );
         if (!conversation) throw new Error("Conversation not found");
         return conversation;
       }),
@@ -1745,34 +1946,44 @@ Use markdown formatting for better readability.`,
     archiveConversation: protectedProcedure
       .input(z.object({ conversationId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        const success = await rag.archiveConversation(input.conversationId, ctx.user.id);
+        const success = await rag.archiveConversation(
+          input.conversationId,
+          ctx.user.id
+        );
         return { success };
       }),
 
     deleteConversation: protectedProcedure
       .input(z.object({ conversationId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        const success = await rag.deleteConversation(input.conversationId, ctx.user.id);
+        const success = await rag.deleteConversation(
+          input.conversationId,
+          ctx.user.id
+        );
         return { success };
       }),
 
     // RAG Chat
     chat: protectedProcedure
-      .input(z.object({
-        conversationId: z.number(),
-        message: z.string().min(1).max(10000),
-      }))
+      .input(
+        z.object({
+          conversationId: z.number(),
+          message: z.string().min(1).max(10000),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         return rag.ragChat(ctx.user.id, input.conversationId, input.message);
       }),
 
     // Feedback
     provideFeedback: protectedProcedure
-      .input(z.object({
-        messageId: z.number(),
-        feedback: z.enum(["positive", "negative"]),
-        comment: z.string().max(1000).optional(),
-      }))
+      .input(
+        z.object({
+          messageId: z.number(),
+          feedback: z.enum(["positive", "negative"]),
+          comment: z.string().max(1000).optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const success = await rag.provideFeedback(
           input.messageId,
@@ -1790,34 +2001,43 @@ Use markdown formatting for better readability.`,
 
     // File Upload
     uploadFile: protectedProcedure
-      .input(z.object({
-        filename: z.string().min(1).max(255),
-        content: z.string(), // Base64 encoded file content
-        tags: z.array(z.string()).max(20).optional(),
-      }))
+      .input(
+        z.object({
+          filename: z.string().min(1).max(255),
+          content: z.string(), // Base64 encoded file content
+          tags: z.array(z.string()).max(20).optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // Validate file type
         if (!ragFileUpload.isSupportedFileType(input.filename)) {
-          throw new Error(`Unsupported file type. Supported: ${Object.keys(ragFileUpload.SUPPORTED_FILE_TYPES).join(", ")}`);
+          throw new Error(
+            `Unsupported file type. Supported: ${Object.keys(ragFileUpload.SUPPORTED_FILE_TYPES).join(", ")}`
+          );
         }
-        
+
         // Decode base64 content
         const buffer = Buffer.from(input.content, "base64");
-        
+
         // Validate file size (10MB max)
         if (!ragFileUpload.validateFileSize(buffer.length)) {
           throw new Error(`File too large. Maximum size is 10MB.`);
         }
-        
+
         // Parse the file
         const parsed = await ragFileUpload.parseFile(buffer, input.filename);
-        
+
         // Extract title from content or use filename
-        const title = ragFileUpload.extractTitleFromContent(parsed.content, input.filename);
-        
+        const title = ragFileUpload.extractTitleFromContent(
+          parsed.content,
+          input.filename
+        );
+
         // Detect source type
-        const sourceType = ragFileUpload.detectSourceType(parsed.metadata.extension);
-        
+        const sourceType = ragFileUpload.detectSourceType(
+          parsed.metadata.extension
+        );
+
         // Ingest the document
         const result = await rag.ingestDocument(
           ctx.user.id,
@@ -1828,7 +2048,7 @@ Use markdown formatting for better readability.`,
           input.tags,
           parsed.metadata
         );
-        
+
         return {
           ...result,
           metadata: parsed.metadata,
@@ -1837,10 +2057,12 @@ Use markdown formatting for better readability.`,
 
     // Search conversations and messages
     searchConversations: protectedProcedure
-      .input(z.object({
-        query: z.string().min(1).max(500),
-        limit: z.number().min(1).max(50).default(20),
-      }))
+      .input(
+        z.object({
+          query: z.string().min(1).max(500),
+          limit: z.number().min(1).max(50).default(20),
+        })
+      )
       .query(async ({ ctx, input }) => {
         return rag.searchConversations(ctx.user.id, input.query, input.limit);
       }),
@@ -1851,63 +2073,70 @@ Use markdown formatting for better readability.`,
     // List all profiles (built-in + custom)
     list: protectedProcedure.query(async ({ ctx }) => {
       const customProfiles = await db.getCustomAgentProfiles(ctx.user.id);
-      
+
       // Built-in profiles
       const builtInProfiles = [
         {
-          id: 'patch_goblin',
-          name: 'Patch Goblin',
-          slug: 'patch_goblin',
-          description: 'Fast diffs, minimal prose. Gets straight to the code changes.',
-          icon: 'Zap',
-          color: 'green',
-          systemPrompt: 'You are a fast-moving code goblin. Output only diffs and minimal explanations. No fluff.',
-          outputStyle: 'concise' as const,
-          codeGeneration: 'diffs' as const,
-          testingApproach: 'test_after' as const,
+          id: "patch_goblin",
+          name: "Patch Goblin",
+          slug: "patch_goblin",
+          description:
+            "Fast diffs, minimal prose. Gets straight to the code changes.",
+          icon: "Zap",
+          color: "green",
+          systemPrompt:
+            "You are a fast-moving code goblin. Output only diffs and minimal explanations. No fluff.",
+          outputStyle: "concise" as const,
+          codeGeneration: "diffs" as const,
+          testingApproach: "test_after" as const,
           isBuiltIn: true,
         },
         {
-          id: 'architect_owl',
-          name: 'Architect Owl',
-          slug: 'architect_owl',
-          description: 'Design and tradeoffs focus. Thinks before coding.',
-          icon: 'Bird',
-          color: 'blue',
-          systemPrompt: 'You are a wise architect owl. Focus on design decisions, tradeoffs, and system structure. Explain your reasoning before suggesting code.',
-          outputStyle: 'detailed' as const,
-          codeGeneration: 'none' as const,
-          testingApproach: 'test_first' as const,
+          id: "architect_owl",
+          name: "Architect Owl",
+          slug: "architect_owl",
+          description: "Design and tradeoffs focus. Thinks before coding.",
+          icon: "Bird",
+          color: "blue",
+          systemPrompt:
+            "You are a wise architect owl. Focus on design decisions, tradeoffs, and system structure. Explain your reasoning before suggesting code.",
+          outputStyle: "detailed" as const,
+          codeGeneration: "none" as const,
+          testingApproach: "test_first" as const,
           isBuiltIn: true,
         },
         {
-          id: 'test_gremlin',
-          name: 'Test Gremlin',
-          slug: 'test_gremlin',
-          description: 'Test-first approach. Writes tests before implementation.',
-          icon: 'Bug',
-          color: 'orange',
-          systemPrompt: 'You are a test-obsessed gremlin. Always write tests first, then implement. Coverage is king.',
-          outputStyle: 'balanced' as const,
-          codeGeneration: 'full' as const,
-          testingApproach: 'test_first' as const,
+          id: "test_gremlin",
+          name: "Test Gremlin",
+          slug: "test_gremlin",
+          description:
+            "Test-first approach. Writes tests before implementation.",
+          icon: "Bug",
+          color: "orange",
+          systemPrompt:
+            "You are a test-obsessed gremlin. Always write tests first, then implement. Coverage is king.",
+          outputStyle: "balanced" as const,
+          codeGeneration: "full" as const,
+          testingApproach: "test_first" as const,
           isBuiltIn: true,
         },
         {
-          id: 'refactor_surgeon',
-          name: 'Refactor Surgeon',
-          slug: 'refactor_surgeon',
-          description: 'Safe refactors only. Preserves behavior while improving structure.',
-          icon: 'Scissors',
-          color: 'purple',
-          systemPrompt: 'You are a precise refactoring surgeon. Make safe, incremental changes. Never break existing functionality.',
-          outputStyle: 'balanced' as const,
-          codeGeneration: 'diffs' as const,
-          testingApproach: 'test_after' as const,
+          id: "refactor_surgeon",
+          name: "Refactor Surgeon",
+          slug: "refactor_surgeon",
+          description:
+            "Safe refactors only. Preserves behavior while improving structure.",
+          icon: "Scissors",
+          color: "purple",
+          systemPrompt:
+            "You are a precise refactoring surgeon. Make safe, incremental changes. Never break existing functionality.",
+          outputStyle: "balanced" as const,
+          codeGeneration: "diffs" as const,
+          testingApproach: "test_after" as const,
           isBuiltIn: true,
         },
       ];
-      
+
       return {
         builtIn: builtInProfiles,
         custom: customProfiles.map(p => ({ ...p, isBuiltIn: false })),
@@ -1916,49 +2145,70 @@ Use markdown formatting for better readability.`,
 
     // Get single profile
     get: protectedProcedure
-      .input(z.object({
-        id: z.union([z.number(), z.string()]),
-      }))
+      .input(
+        z.object({
+          id: z.union([z.number(), z.string()]),
+        })
+      )
       .query(async ({ ctx, input }) => {
         // Check if it's a built-in profile
-        if (typeof input.id === 'string') {
-          const builtIn = ['patch_goblin', 'architect_owl', 'test_gremlin', 'refactor_surgeon'];
+        if (typeof input.id === "string") {
+          const builtIn = [
+            "patch_goblin",
+            "architect_owl",
+            "test_gremlin",
+            "refactor_surgeon",
+          ];
           if (builtIn.includes(input.id)) {
             return { isBuiltIn: true, slug: input.id };
           }
         }
-        
+
         // Get custom profile
-        const profile = await db.getCustomAgentProfile(Number(input.id), ctx.user.id);
+        const profile = await db.getCustomAgentProfile(
+          Number(input.id),
+          ctx.user.id
+        );
         if (!profile) {
-          throw new Error('Profile not found');
+          throw new Error("Profile not found");
         }
         return { ...profile, isBuiltIn: false };
       }),
 
     // Create custom profile
     create: protectedProcedure
-      .input(z.object({
-        name: z.string().min(1).max(100),
-        description: z.string().min(1).max(500),
-        icon: z.string().default('Bot'),
-        color: z.string().default('purple'),
-        systemPrompt: z.string().min(10).max(5000),
-        outputStyle: z.enum(['concise', 'detailed', 'balanced']).default('balanced'),
-        codeGeneration: z.enum(['full', 'diffs', 'none']).default('diffs'),
-        testingApproach: z.enum(['test_first', 'test_after', 'no_tests']).default('test_after'),
-        settings: z.object({
-          maxResponseLength: z.number().optional(),
-          preferredLanguages: z.array(z.string()).optional(),
-          avoidPatterns: z.array(z.string()).optional(),
-          focusAreas: z.array(z.string()).optional(),
-        }).optional(),
-        isPublic: z.boolean().default(false),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(1).max(100),
+          description: z.string().min(1).max(500),
+          icon: z.string().default("Bot"),
+          color: z.string().default("purple"),
+          systemPrompt: z.string().min(10).max(5000),
+          outputStyle: z
+            .enum(["concise", "detailed", "balanced"])
+            .default("balanced"),
+          codeGeneration: z.enum(["full", "diffs", "none"]).default("diffs"),
+          testingApproach: z
+            .enum(["test_first", "test_after", "no_tests"])
+            .default("test_after"),
+          settings: z
+            .object({
+              maxResponseLength: z.number().optional(),
+              preferredLanguages: z.array(z.string()).optional(),
+              avoidPatterns: z.array(z.string()).optional(),
+              focusAreas: z.array(z.string()).optional(),
+            })
+            .optional(),
+          isPublic: z.boolean().default(false),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // Generate slug from name
-        const slug = input.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-        
+        const slug = input.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_|_$/g, "");
+
         const profile = await db.createCustomAgentProfile({
           userId: ctx.user.id,
           name: input.name,
@@ -1973,71 +2223,84 @@ Use markdown formatting for better readability.`,
           settings: input.settings || null,
           isPublic: input.isPublic,
         });
-        
+
         return profile;
       }),
 
     // Update custom profile
     update: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        name: z.string().min(1).max(100).optional(),
-        description: z.string().min(1).max(500).optional(),
-        icon: z.string().optional(),
-        color: z.string().optional(),
-        systemPrompt: z.string().min(10).max(5000).optional(),
-        outputStyle: z.enum(['concise', 'detailed', 'balanced']).optional(),
-        codeGeneration: z.enum(['full', 'diffs', 'none']).optional(),
-        testingApproach: z.enum(['test_first', 'test_after', 'no_tests']).optional(),
-        settings: z.object({
-          maxResponseLength: z.number().optional(),
-          preferredLanguages: z.array(z.string()).optional(),
-          avoidPatterns: z.array(z.string()).optional(),
-          focusAreas: z.array(z.string()).optional(),
-        }).optional(),
-        isPublic: z.boolean().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().min(1).max(100).optional(),
+          description: z.string().min(1).max(500).optional(),
+          icon: z.string().optional(),
+          color: z.string().optional(),
+          systemPrompt: z.string().min(10).max(5000).optional(),
+          outputStyle: z.enum(["concise", "detailed", "balanced"]).optional(),
+          codeGeneration: z.enum(["full", "diffs", "none"]).optional(),
+          testingApproach: z
+            .enum(["test_first", "test_after", "no_tests"])
+            .optional(),
+          settings: z
+            .object({
+              maxResponseLength: z.number().optional(),
+              preferredLanguages: z.array(z.string()).optional(),
+              avoidPatterns: z.array(z.string()).optional(),
+              focusAreas: z.array(z.string()).optional(),
+            })
+            .optional(),
+          isPublic: z.boolean().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const { id, ...updates } = input;
-        
+
         // Verify ownership
         const existing = await db.getCustomAgentProfile(id, ctx.user.id);
         if (!existing) {
-          throw new Error('Profile not found or access denied');
+          throw new Error("Profile not found or access denied");
         }
-        
+
         // Update slug if name changed
         const updateData: Record<string, unknown> = { ...updates };
         if (updates.name) {
-          updateData.slug = updates.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+          updateData.slug = updates.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_|_$/g, "");
         }
-        
+
         await db.updateCustomAgentProfile(id, ctx.user.id, updateData);
         return { success: true };
       }),
 
     // Delete custom profile
     delete: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         // Verify ownership
         const existing = await db.getCustomAgentProfile(input.id, ctx.user.id);
         if (!existing) {
-          throw new Error('Profile not found or access denied');
+          throw new Error("Profile not found or access denied");
         }
-        
+
         await db.deleteCustomAgentProfile(input.id, ctx.user.id);
         return { success: true };
       }),
 
     // Duplicate a profile (built-in or custom)
     duplicate: protectedProcedure
-      .input(z.object({
-        sourceId: z.union([z.number(), z.string()]),
-        newName: z.string().min(1).max(100),
-      }))
+      .input(
+        z.object({
+          sourceId: z.union([z.number(), z.string()]),
+          newName: z.string().min(1).max(100),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         let sourceProfile: {
           name: string;
@@ -2045,74 +2308,87 @@ Use markdown formatting for better readability.`,
           icon: string;
           color: string;
           systemPrompt: string;
-          outputStyle: 'concise' | 'detailed' | 'balanced';
-          codeGeneration: 'full' | 'diffs' | 'none';
-          testingApproach: 'test_first' | 'test_after' | 'no_tests';
+          outputStyle: "concise" | "detailed" | "balanced";
+          codeGeneration: "full" | "diffs" | "none";
+          testingApproach: "test_first" | "test_after" | "no_tests";
           settings?: Record<string, unknown> | null;
         };
-        
+
         // Get source profile data
-        if (typeof input.sourceId === 'string') {
+        if (typeof input.sourceId === "string") {
           // Built-in profile
           const builtInMap: Record<string, typeof sourceProfile> = {
             patch_goblin: {
-              name: 'Patch Goblin',
-              description: 'Fast diffs, minimal prose. Gets straight to the code changes.',
-              icon: 'Zap',
-              color: 'green',
-              systemPrompt: 'You are a fast-moving code goblin. Output only diffs and minimal explanations. No fluff.',
-              outputStyle: 'concise',
-              codeGeneration: 'diffs',
-              testingApproach: 'test_after',
+              name: "Patch Goblin",
+              description:
+                "Fast diffs, minimal prose. Gets straight to the code changes.",
+              icon: "Zap",
+              color: "green",
+              systemPrompt:
+                "You are a fast-moving code goblin. Output only diffs and minimal explanations. No fluff.",
+              outputStyle: "concise",
+              codeGeneration: "diffs",
+              testingApproach: "test_after",
             },
             architect_owl: {
-              name: 'Architect Owl',
-              description: 'Design and tradeoffs focus. Thinks before coding.',
-              icon: 'Bird',
-              color: 'blue',
-              systemPrompt: 'You are a wise architect owl. Focus on design decisions, tradeoffs, and system structure. Explain your reasoning before suggesting code.',
-              outputStyle: 'detailed',
-              codeGeneration: 'none',
-              testingApproach: 'test_first',
+              name: "Architect Owl",
+              description: "Design and tradeoffs focus. Thinks before coding.",
+              icon: "Bird",
+              color: "blue",
+              systemPrompt:
+                "You are a wise architect owl. Focus on design decisions, tradeoffs, and system structure. Explain your reasoning before suggesting code.",
+              outputStyle: "detailed",
+              codeGeneration: "none",
+              testingApproach: "test_first",
             },
             test_gremlin: {
-              name: 'Test Gremlin',
-              description: 'Test-first approach. Writes tests before implementation.',
-              icon: 'Bug',
-              color: 'orange',
-              systemPrompt: 'You are a test-obsessed gremlin. Always write tests first, then implement. Coverage is king.',
-              outputStyle: 'balanced',
-              codeGeneration: 'full',
-              testingApproach: 'test_first',
+              name: "Test Gremlin",
+              description:
+                "Test-first approach. Writes tests before implementation.",
+              icon: "Bug",
+              color: "orange",
+              systemPrompt:
+                "You are a test-obsessed gremlin. Always write tests first, then implement. Coverage is king.",
+              outputStyle: "balanced",
+              codeGeneration: "full",
+              testingApproach: "test_first",
             },
             refactor_surgeon: {
-              name: 'Refactor Surgeon',
-              description: 'Safe refactors only. Preserves behavior while improving structure.',
-              icon: 'Scissors',
-              color: 'purple',
-              systemPrompt: 'You are a precise refactoring surgeon. Make safe, incremental changes. Never break existing functionality.',
-              outputStyle: 'balanced',
-              codeGeneration: 'diffs',
-              testingApproach: 'test_after',
+              name: "Refactor Surgeon",
+              description:
+                "Safe refactors only. Preserves behavior while improving structure.",
+              icon: "Scissors",
+              color: "purple",
+              systemPrompt:
+                "You are a precise refactoring surgeon. Make safe, incremental changes. Never break existing functionality.",
+              outputStyle: "balanced",
+              codeGeneration: "diffs",
+              testingApproach: "test_after",
             },
           };
-          
+
           sourceProfile = builtInMap[input.sourceId];
           if (!sourceProfile) {
-            throw new Error('Built-in profile not found');
+            throw new Error("Built-in profile not found");
           }
         } else {
           // Custom profile
-          const custom = await db.getCustomAgentProfile(input.sourceId, ctx.user.id);
+          const custom = await db.getCustomAgentProfile(
+            input.sourceId,
+            ctx.user.id
+          );
           if (!custom) {
-            throw new Error('Profile not found or access denied');
+            throw new Error("Profile not found or access denied");
           }
           sourceProfile = custom;
         }
-        
+
         // Create duplicate with new name
-        const slug = input.newName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-        
+        const slug = input.newName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_|_$/g, "");
+
         const newProfile = await db.createCustomAgentProfile({
           userId: ctx.user.id,
           name: input.newName,
@@ -2127,47 +2403,71 @@ Use markdown formatting for better readability.`,
           settings: sourceProfile.settings || null,
           isPublic: false,
         });
-        
+
         return newProfile;
       }),
 
     // Track usage
     trackUsage: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         await db.incrementAgentProfileUsage(input.id, ctx.user.id);
         return { success: true };
       }),
 
     // ==================== TEMPLATE GALLERY ====================
-    
+
     // List all available templates
     listTemplates: publicProcedure
-      .input(z.object({
-        category: z.enum(['all', 'documentation', 'security', 'performance', 'architecture', 'testing', 'devops', 'specialized']).default('all'),
-        search: z.string().optional(),
-      }).optional())
+      .input(
+        z
+          .object({
+            category: z
+              .enum([
+                "all",
+                "documentation",
+                "security",
+                "performance",
+                "architecture",
+                "testing",
+                "devops",
+                "specialized",
+              ])
+              .default("all"),
+            search: z.string().optional(),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
-        const { agentProfileTemplates, categoryInfo, searchTemplates, getTemplatesByCategory } = await import('../shared/agentProfileTemplates');
-        
-        const category = input?.category || 'all';
+        const {
+          agentProfileTemplates,
+          categoryInfo,
+          searchTemplates,
+          getTemplatesByCategory,
+        } = await import("../shared/agentProfileTemplates");
+
+        const category = input?.category || "all";
         const search = input?.search;
-        
+
         let templates = agentProfileTemplates;
-        
+
         // Filter by category
-        if (category !== 'all') {
+        if (category !== "all") {
           templates = getTemplatesByCategory(category as any);
         }
-        
+
         // Filter by search
         if (search && search.trim()) {
           const searchResults = searchTemplates(search);
-          templates = templates.filter(t => searchResults.some(sr => sr.id === t.id));
+          templates = templates.filter(t =>
+            searchResults.some(sr => sr.id === t.id)
+          );
         }
-        
+
         return {
           templates,
           categories: categoryInfo,
@@ -2177,38 +2477,49 @@ Use markdown formatting for better readability.`,
 
     // Get single template by ID
     getTemplate: publicProcedure
-      .input(z.object({
-        id: z.string(),
-      }))
+      .input(
+        z.object({
+          id: z.string(),
+        })
+      )
       .query(async ({ input }) => {
-        const { getTemplateById } = await import('../shared/agentProfileTemplates');
+        const { getTemplateById } = await import(
+          "../shared/agentProfileTemplates"
+        );
         const template = getTemplateById(input.id);
-        
+
         if (!template) {
-          throw new Error('Template not found');
+          throw new Error("Template not found");
         }
-        
+
         return template;
       }),
 
     // Import template as custom profile
     importTemplate: protectedProcedure
-      .input(z.object({
-        templateId: z.string(),
-        customName: z.string().min(1).max(100).optional(),
-      }))
+      .input(
+        z.object({
+          templateId: z.string(),
+          customName: z.string().min(1).max(100).optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
-        const { getTemplateById } = await import('../shared/agentProfileTemplates');
+        const { getTemplateById } = await import(
+          "../shared/agentProfileTemplates"
+        );
         const template = getTemplateById(input.templateId);
-        
+
         if (!template) {
-          throw new Error('Template not found');
+          throw new Error("Template not found");
         }
-        
+
         // Use custom name or template name
         const name = input.customName || template.name;
-        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-        
+        const slug = name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_|_$/g, "");
+
         // Create custom profile from template
         const profile = await db.createCustomAgentProfile({
           userId: ctx.user.id,
@@ -2224,7 +2535,7 @@ Use markdown formatting for better readability.`,
           settings: null,
           isPublic: false,
         });
-        
+
         return {
           profile,
           sourceTemplate: template.id,

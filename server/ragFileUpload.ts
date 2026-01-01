@@ -4,7 +4,7 @@
  */
 
 import * as pdfParse from "pdf-parse";
-const pdf = (pdfParse as any).default || pdfParse;
+const pdf = ((pdfParse as Record<string, unknown>).default || pdfParse) as (buffer: Buffer) => Promise<{ text: string; numpages: number }>;
 
 // Supported file extensions and their MIME types
 export const SUPPORTED_FILE_TYPES = {
